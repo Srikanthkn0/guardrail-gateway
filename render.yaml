@@ -1,0 +1,24 @@
+# Render Blueprint — backend API (free tier)
+# Mock provider works without API keys. SQLite uses DATA_DIR (ephemeral on free tier).
+
+services:
+  - type: web
+    name: guardrail-gateway-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --workers 1 --timeout 120
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: FRONTEND_ORIGINS
+        value: https://guardrail-gateway.vercel.app
+      - key: DATA_DIR
+        value: /tmp/guardrail-data
+      - key: DEFAULT_PROVIDER
+        value: mock
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
