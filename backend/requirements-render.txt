@@ -1,0 +1,9 @@
+# Production Render deploy: sklearn-only ML (no torch/transformers).
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+gunicorn>=22.0.0
+python-dotenv>=1.0.0
+pydantic>=2.10.0
+httpx>=0.28.0
+scikit-learn>=1.5.0
+joblib>=1.4.0

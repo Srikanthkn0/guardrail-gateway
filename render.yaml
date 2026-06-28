@@ -9,8 +9,8 @@ services:
     plan: free
     rootDir: backend
     healthCheckPath: /health/live
-    buildCommand: pip install -r requirements.txt && python scripts/train_sklearn_classifier.py && python scripts/warm_ml_model.py
-    startCommand: gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --workers 1 --timeout 120
+    buildCommand: pip install -r requirements-render.txt && python scripts/train_sklearn_classifier.py
+    startCommand: gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --workers 1 --timeout 120 --graceful-timeout 30
     envVars:
       - key: APP_ENV
         value: production
@@ -31,13 +31,13 @@ services:
       - key: API_KEY
         sync: false
       - key: REQUIRE_API_KEY
-        value: "true"
+        value: "false"
       - key: ML_GUARD_GROK_MODEL
         value: grok-3-mini
       - key: ML_GUARD_ENABLED
         value: "true"
       - key: ML_GUARD_BACKEND
-        value: auto
+        value: sklearn
       - key: ML_GUARD_MODEL
         value: fmops/distilbert-prompt-injection
       - key: RATE_LIMIT_CHAT_PER_MIN
