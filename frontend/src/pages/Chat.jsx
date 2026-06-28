@@ -55,8 +55,10 @@ export default function Chat({ onViewLog }) {
         const health = await fetchHealth();
         const available = health.providers.filter((item) => item.available);
         setProviders(available);
-        const defaultId = health.effective_default_provider || health.default_provider;
-        setEffectiveDefault(defaultId);
+        const effectiveId = health.effective_default_provider || health.default_provider;
+        setEffectiveDefault(effectiveId);
+        const mockProvider = available.find((item) => item.id === "mock");
+        const defaultId = mockProvider ? "mock" : effectiveId;
         setProvider(defaultId);
         const defaultProvider = available.find((item) => item.id === defaultId);
         if (defaultProvider?.default_model) {

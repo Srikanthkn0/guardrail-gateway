@@ -50,7 +50,7 @@ def test_gateway_chat_warns_but_forwards():
     )
     assert response.status_code == 200
     payload = response.json()
-    # Rules warn; ML may block stricter phrases — this prompt stays warn + forward.
+    # Rules warn; ML may block stricter phrases - this prompt stays warn + forward.
     assert payload["final_decision"] in ("warn", "block")
     if payload["final_decision"] == "warn":
         assert payload["forwarded"] is True

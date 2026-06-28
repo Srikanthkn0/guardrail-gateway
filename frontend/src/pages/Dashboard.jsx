@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import StatsSummary from "../components/StatsSummary.jsx";
 import DecisionBadge from "../components/DecisionBadge.jsx";
 import { fetchHealth, fetchLogs, fetchMlHealth, fetchStats, getApiBaseUrl } from "../api.js";
@@ -12,41 +12,34 @@ export default function Dashboard({ onOpenLogs }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      try {
-        const [healthData, mlData, statsData, logsData] = await Promise.all([
-          fetchHealth(),
-          fetchMlHealth().catch(() => null),
-          fetchStats().catch(() => null),
-          fetchLogs({ limit: 5 }).catch(() => ({ logs: [] })),
-        ]);
-        if (!cancelled) {
-          setHealth(healthData);
-          setMlHealth(mlData);
-          setStats(statsData);
-          setRecentLogs(logsData.logs || []);
-          setError(null);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(err.message);
-          setHealth(null);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
+  const loadDashboard = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [healthData, mlData, statsData, logsData] = await Promise.all([
+        fetchHealth(),
+        fetchMlHealth().catch(() => null),
+        fetchStats().catch(() => null),
+        fetchLogs({ limit: 5 }).catch(() => ({ logs: [] })),
+      ]);
+      setHealth(healthData);
+      setMlHealth(mlData);
+      setStats(statsData);
+      setRecentLogs(logsData.logs || []);
+    } catch (err) {
+      setError(err.message);
+      setHealth(null);
+      setMlHealth(null);
+      setStats(null);
+      setRecentLogs([]);
+    } finally {
+      setLoading(false);
     }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
   }, []);
+
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
 
   function mlBadgeClass() {
     if (!mlHealth?.enabled) return "ml-badge-off";
@@ -63,8 +56,20 @@ export default function Dashboard({ onOpenLogs }) {
   return (
     <div className="stack">
       <header className="page-header">
-        <h2>Overview</h2>
-        <p>Gateway health, decision breakdown, and recent traffic.</p>
+        <div className="toolbar">
+          <div>
+            <h2>Overview</h2>
+            <p>Gateway health, decision breakdown, and recent traffic.</p>
+          </div>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm-inline"
+            onClick={loadDashboard}
+            disabled={loading}
+          >
+            Refresh
+          </button>
+        </div>
       </header>
 
       <section className="card">
@@ -106,6 +111,19 @@ export default function Dashboard({ onOpenLogs }) {
               <span className="label">Default provider</span>
               <span className="value">{health.default_provider}</span>
             </div>
+            <div className="status-list-item">
+              <span className="label">Effective provider</span>
+              <span className="value">{health.effective_default_provider}</span>
+            </div>
+            {health.rules_count != null && (
+              <div className="status-list-item">
+                <span className="label">Guardrail rules</span>
+                <span className="value">
+                  {health.rules_count.toLocaleString()} ({health.input_rules_count} input,{" "}
+                  {health.output_rules_count} output)
+                </span>
+              </div>
+            )}
           </div>
         )}
 

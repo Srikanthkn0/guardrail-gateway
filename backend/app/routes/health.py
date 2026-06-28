@@ -6,6 +6,7 @@ from app.providers.registry import effective_default_provider
 from app.providers.router import list_available_providers
 from app.services.grok_classifier import is_grok_configured
 from app.services.ml_classifier import classifier_status, ensure_sklearn_loaded
+from app.services.rules_catalog import RULES, list_input_rules, list_output_rules
 from app.storage.log_store import DB_PATH
 
 router = APIRouter()
@@ -49,6 +50,9 @@ async def health_check():
         default_provider=settings.DEFAULT_PROVIDER,
         effective_default_provider=effective_default_provider(),
         grok_api_configured=is_grok_configured(),
+        rules_count=len(RULES),
+        input_rules_count=len(list_input_rules()),
+        output_rules_count=len(list_output_rules()),
         providers=providers,
     )
 

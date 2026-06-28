@@ -20,6 +20,9 @@ class HealthResponse(BaseModel):
     default_provider: str
     effective_default_provider: str
     grok_api_configured: bool = False
+    rules_count: int = 0
+    input_rules_count: int = 0
+    output_rules_count: int = 0
     providers: list[ProviderStatus]
 
 
