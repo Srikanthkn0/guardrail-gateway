@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Logo from "./components/Logo.jsx";
+import NavIcon from "./components/NavIcon.jsx";
 import Chat from "./pages/Chat.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Logs from "./pages/Logs.jsx";
@@ -7,10 +8,30 @@ import Rules from "./pages/Rules.jsx";
 import { fetchLiveness } from "./api.js";
 
 const NAV_ITEMS = [
-  { id: "dashboard", label: "Overview", icon: "◉" },
-  { id: "rules", label: "Rules", icon: "⬡" },
-  { id: "chat", label: "Chat", icon: "▸" },
-  { id: "logs", label: "Logs", icon: "≡" },
+  {
+    id: "dashboard",
+    label: "Overview",
+    icon: "dashboard",
+    description: "System health, pipeline metrics, and live status",
+  },
+  {
+    id: "rules",
+    label: "Rules",
+    icon: "rules",
+    description: "Test prompt and output guardrails in isolation",
+  },
+  {
+    id: "chat",
+    label: "Chat",
+    icon: "chat",
+    description: "Live LLM proxy with full gateway inspection",
+  },
+  {
+    id: "logs",
+    label: "Logs",
+    icon: "logs",
+    description: "Audit trail for every request and decision",
+  },
 ];
 
 const GITHUB_URL = "https://github.com/Srikanthkn0/guardrail-gateway";
@@ -45,17 +66,13 @@ export default function App() {
     };
   }, []);
 
-  const activeLabel = NAV_ITEMS.find((item) => item.id === activeTab)?.label ?? "";
+  const activeItem = NAV_ITEMS.find((item) => item.id === activeTab) ?? NAV_ITEMS[0];
 
   return (
     <div className="app-shell">
       <aside className="sidebar">
         <div className="sidebar-brand">
-          <Logo size={32} />
-          <div className="sidebar-brand-text">
-            <span className="sidebar-title">Guardrail</span>
-            <span className="sidebar-subtitle">Safety Gateway</span>
-          </div>
+          <Logo size={40} showWordmark />
         </div>
 
         <nav className="sidebar-nav" aria-label="Main">
@@ -66,9 +83,7 @@ export default function App() {
               className={`sidebar-link ${activeTab === item.id ? "sidebar-link-active" : ""}`}
               onClick={() => setActiveTab(item.id)}
             >
-              <span className="sidebar-link-icon" aria-hidden="true">
-                {item.icon}
-              </span>
+              <NavIcon name={item.icon} />
               {item.label}
             </button>
           ))}
@@ -76,7 +91,9 @@ export default function App() {
 
         <div className="sidebar-footer">
           <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="sidebar-github">
-            GitHub
+            <NavIcon name="github" />
+            Source
+            <NavIcon name="external" className="nav-icon-external" />
           </a>
           <span className="sidebar-version">v1.0</span>
         </div>
@@ -85,20 +102,36 @@ export default function App() {
       <div className="app-body">
         <header className="topbar">
           <div className="topbar-title">
-            <h1>{activeLabel}</h1>
-            <span className="topbar-status">
-              <span
-                className={`status-dot ${apiOnline === false ? "status-dot-offline" : ""}`}
-              />
-              {apiOnline === null && "Checking API…"}
-              {apiOnline === true && "API online"}
-              {apiOnline === false && "API unreachable"}
-            </span>
+            <div className="topbar-heading">
+              <h1>{activeItem.label}</h1>
+              <p className="topbar-subtitle">{activeItem.description}</p>
+            </div>
+            <div className="topbar-actions">
+              <span className="topbar-status">
+                <span
+                  className={`status-dot ${apiOnline === false ? "status-dot-offline" : ""}`}
+                />
+                {apiOnline === null && "Checking API…"}
+                {apiOnline === true && "API online"}
+                {apiOnline === false && "API unreachable"}
+              </span>
+              {activeTab !== "chat" && (
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm-inline"
+                  onClick={() => setActiveTab("chat")}
+                >
+                  Try live chat
+                </button>
+              )}
+            </div>
           </div>
         </header>
 
         <main className="main-content">
-          {activeTab === "dashboard" && <Dashboard onOpenLogs={openLogs} />}
+          {activeTab === "dashboard" && (
+            <Dashboard onOpenLogs={openLogs} onOpenChat={() => setActiveTab("chat")} />
+          )}
           {activeTab === "rules" && <Rules />}
           {activeTab === "chat" && <Chat onViewLog={openLogs} />}
           {activeTab === "logs" && (
