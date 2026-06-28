@@ -105,6 +105,37 @@ INPUT_RULES: list[GuardrailRule] = [
         description="Known jailbreak acronym expansion phrasing.",
     ),
     GuardrailRule(
+        id="jb_hack_this",
+        name="Hack command",
+        category="jailbreak",
+        severity="block",
+        match_type="regex",
+        pattern=(
+            r"(?i)\bhack this\b"
+            r"(?!\s+(code|script|function|algorithm|problem|issue|bug|file|module|class|method|api|endpoint|recipe))"
+        ),
+        description="Direct hack or jailbreak attempt phrasing.",
+    ),
+    GuardrailRule(
+        id="jb_jailbreak",
+        name="Jailbreak marker",
+        category="jailbreak",
+        severity="block",
+        match_type="phrase",
+        pattern="jailbreak",
+        description="Explicit jailbreak attempt.",
+    ),
+    GuardrailRule(
+        id="jb_hack_system",
+        name="Hack system target",
+        category="jailbreak",
+        severity="block",
+        match_type="regex",
+        pattern=r"(?i)\bhack\s+(the\s+)?(system|prompt|model|llm|ai|guardrail|security)\b",
+        description="Attempt to hack or compromise AI system components.",
+    ),
+
+    GuardrailRule(
         id="warn_pretend",
         name="Pretend persona shift",
         category="jailbreak",

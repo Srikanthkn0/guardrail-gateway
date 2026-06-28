@@ -35,6 +35,17 @@ def test_rule_test_blocks_injection():
     assert len(result["hits"]) >= 2
 
 
+def test_rule_test_blocks_hack_this():
+    response = client.post(
+        "/rules/test",
+        json={"text": "hack this"},
+    )
+    assert response.status_code == 200
+    result = response.json()["input"]
+    assert result["decision"] == "block"
+    assert "jb_hack_this" in result["matched_rule_ids"]
+
+
 def test_rule_test_warns_suspicious_prompt():
     response = client.post(
         "/rules/test",
