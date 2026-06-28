@@ -19,6 +19,7 @@ class HealthResponse(BaseModel):
     environment: str
     default_provider: str
     effective_default_provider: str
+    grok_api_configured: bool = False
     providers: list[ProviderStatus]
 
 

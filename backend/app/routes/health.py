@@ -4,6 +4,7 @@ from app.config import settings
 from app.models import HealthResponse, ProviderStatus
 from app.providers.registry import effective_default_provider
 from app.providers.router import list_available_providers
+from app.services.grok_classifier import is_grok_configured
 from app.services.ml_classifier import classifier_status
 
 router = APIRouter()
@@ -27,6 +28,7 @@ async def health_check():
         environment=settings.APP_ENV,
         default_provider=settings.DEFAULT_PROVIDER,
         effective_default_provider=effective_default_provider(),
+        grok_api_configured=is_grok_configured(),
         providers=providers,
     )
 

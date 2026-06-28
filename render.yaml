@@ -1,5 +1,5 @@
 # Render Blueprint — backend API (free tier)
-# Mock provider works without API keys. SQLite uses DATA_DIR (ephemeral on free tier).
+# Set XAI_API_KEY or GROK_API_KEY for Grok chat + prompt scanning (not GROQ_API_KEY).
 
 services:
   - type: web
