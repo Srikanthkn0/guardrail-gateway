@@ -47,6 +47,21 @@ export default function Dashboard({ onOpenLogs }) {
 
   return (
     <div className="stack">
+      <section className="hero-card">
+        <div className="hero-content">
+          <h2>LLM safety at the gateway layer</h2>
+          <p>
+            Scan inputs and outputs with rules plus ML classification, route allowed prompts to
+            providers, and log every decision with full traceability.
+          </p>
+          <div className="pill-row">
+            <span className="pill">Hybrid guard</span>
+            <span className="pill pill-secondary">ML classifier</span>
+            <span className="pill">Request logs</span>
+          </div>
+        </div>
+      </section>
+
       <header className="page-header">
         <h2>Overview</h2>
         <p>Gateway health, decision breakdown, and recent traffic.</p>

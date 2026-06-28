@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Logo from "./components/Logo.jsx";
 import Chat from "./pages/Chat.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Logs from "./pages/Logs.jsx";
@@ -11,6 +12,8 @@ const TABS = [
   { id: "logs", label: "Logs" },
 ];
 
+const GITHUB_URL = "https://github.com/Srikanthkn0/guardrail-gateway";
+
 export default function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [logsFocusId, setLogsFocusId] = useState(null);
@@ -22,13 +25,15 @@ export default function App() {
 
   return (
     <div className="app">
+      <div className="app-glow" aria-hidden="true" />
+
       <header className="app-header">
         <div className="header-inner">
           <div className="brand">
-            <div className="brand-mark" aria-hidden="true" />
-            <div>
-              <h1>Guardrail Gateway</h1>
-              <p className="brand-sub">LLM request inspection and logging</p>
+            <Logo size={36} />
+            <div className="brand-text">
+              <span className="brand-name">Guardrail Gateway</span>
+              <span className="brand-tagline">Rules · ML classifier · Request inspection</span>
             </div>
           </div>
           <nav className="nav-tabs" aria-label="Main">
@@ -59,7 +64,17 @@ export default function App() {
       </main>
 
       <footer className="app-footer">
-        <span>Guardrail Gateway</span>
+        <div className="footer-inner">
+          <div className="footer-brand">
+            <Logo size={20} />
+            <span>LLM safety gateway — open source</span>
+          </div>
+          <div className="footer-links">
+            <a href={GITHUB_URL} target="_blank" rel="noreferrer">
+              GitHub
+            </a>
+          </div>
+        </div>
       </footer>
     </div>
   );
