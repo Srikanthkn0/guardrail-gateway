@@ -42,7 +42,7 @@ async function fetchWithTimeout(url, options = {}) {
     return await fetch(url, { ...options, signal: controller.signal });
   } catch (err) {
     if (err.name === "AbortError") {
-      throw new Error("Request timed out. The gateway may be waking up — retry in a moment.");
+      throw new Error("Request timed out. The gateway may be waking up - retry in a moment.");
     }
     throw err;
   } finally {

@@ -101,9 +101,9 @@ export default function Chat({ onViewLog }) {
 
       const assistantContent = data.response_text
         || (data.response_redacted
-          ? "[Response redacted — output failed safety scan]"
+          ? "[Response redacted - output failed safety scan]"
           : data.input_scan?.decision === "block"
-            ? "[Blocked — prompt failed input safety scan]"
+            ? "[Blocked - prompt failed input safety scan]"
             : "[No response]");
 
       setMessages((prev) => [
@@ -137,24 +137,16 @@ export default function Chat({ onViewLog }) {
 
   return (
     <div className="stack chat-page">
-      <header className="page-header">
-        <p>
-          Every message passes through the gateway: <strong>Grok/HF prompt scan</strong> →{" "}
-          <strong>LLM provider</strong> → <strong>output scan</strong>. Malicious prompts are
-          blocked before the model runs; unsafe responses are redacted.
-        </p>
-      </header>
-
       {!loadingProviders && (
         <div className={`provider-banner ${usingRealLlm ? "provider-banner-live" : ""}`}>
           {usingRealLlm ? (
             <span>
-              Live LLM: <strong>{selectedProvider?.label}</strong> ({model}) — real API responses
+              Live LLM: <strong>{selectedProvider?.label}</strong> ({model}) - real API responses
               with full input/output scanning.
             </span>
           ) : (
             <span>
-              Offline mode: <strong>Mock LLM</strong> — add <code>GEMINI_API_KEY</code>,{" "}
+              Offline mode: <strong>Mock LLM</strong> - add <code>GEMINI_API_KEY</code>,{" "}
               <code>XAI_API_KEY</code>, or <code>OPENAI_API_KEY</code> on the backend. Effective
               default:{" "}
               <code>{effectiveDefault}</code>.
@@ -167,30 +159,7 @@ export default function Chat({ onViewLog }) {
         <section className="card chat-panel">
           <div className="chat-thread">
             {messages.length === 0 && !sending && (
-              <div className="chat-empty">
-                <div className="chat-empty-icon" aria-hidden="true">
-                  <svg viewBox="0 0 48 48" fill="none">
-                    <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="1.25" opacity="0.35" />
-                    <path
-                      d="M24 10L34 14.5V21C34 26.8 29.8 31.2 24 33C18.2 31.2 14 26.8 14 21V14.5L24 10Z"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M19 22H22V25H26V22H29"
-                      stroke="currentColor"
-                      strokeWidth="1.75"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-                <p className="chat-empty-title">Gateway ready</p>
-                <p className="status-text">
-                  Every message is scanned on input and output. Try a normal question or use sample
-                  chips to test blocks and redaction.
-                </p>
-              </div>
+              <p className="status-text chat-empty">No messages yet. Send a prompt or pick a sample below.</p>
             )}
 
             {messages.map((message) => (
@@ -214,10 +183,10 @@ export default function Chat({ onViewLog }) {
               <div className="chat-message chat-message-assistant">
                 <div className="chat-message-meta">
                   <span>Assistant</span>
-                  <span className="chat-tag">scanning…</span>
+                  <span className="chat-tag">scanning...</span>
                 </div>
                 <div className="chat-bubble assistant chat-bubble-loading">
-                  Running input scan → calling LLM → output scan…
+                  Running input scan -&gt; calling LLM -&gt; output scan...
                 </div>
               </div>
             )}
@@ -230,7 +199,7 @@ export default function Chat({ onViewLog }) {
               <label className="field field-inline">
                 <span>Provider</span>
                 {loadingProviders ? (
-                  <span className="status-text">Loading…</span>
+                  <span className="status-text">Loading...</span>
                 ) : (
                   <select
                     value={provider}
@@ -269,7 +238,7 @@ export default function Chat({ onViewLog }) {
                 rows={3}
                 value={prompt}
                 onChange={(event) => setPrompt(event.target.value)}
-                placeholder="Type a prompt — it will be scanned before reaching the LLM…"
+                placeholder="Type a prompt - it will be scanned before reaching the LLM..."
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && !event.shiftKey) {
                     event.preventDefault();
@@ -298,7 +267,7 @@ export default function Chat({ onViewLog }) {
                 className="btn btn-primary"
                 disabled={sending || !prompt.trim() || providers.length === 0}
               >
-                {sending ? "Gateway processing…" : "Send"}
+                {sending ? "Gateway processing..." : "Send"}
               </button>
               <button type="button" className="btn btn-secondary" onClick={handleClear}>
                 Clear chat
