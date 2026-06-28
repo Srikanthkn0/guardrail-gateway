@@ -179,7 +179,7 @@ export default function Dashboard({ onOpenLogs }) {
 
         <section className="ml-card">
           <div className="ml-card-header">
-            <span className="ml-card-title">ML Classifier</span>
+            <span className="ml-card-title">Prompt Scanner</span>
             {mlHealth && <span className={`ml-badge ${mlBadgeClass()}`}>{mlBadgeLabel()}</span>}
           </div>
 

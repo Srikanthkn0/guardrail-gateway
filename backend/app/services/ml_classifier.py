@@ -1,4 +1,4 @@
-"""Prompt-injection classifier — Hugging Face DistilBERT (default) with sklearn fallback."""
+"""Prompt-injection classifier — Grok LLM judge (preferred), HF DistilBERT, sklearn fallback."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ import threading
 from dataclasses import dataclass
 
 from app.config import settings
+from app.services.grok_classifier import classify_prompt, is_grok_configured
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,7 @@ _UNSAFE_LABELS = frozenset(
 
 _pipeline = None
 _sklearn_model = None
+_grok_ready = False
 _load_attempted = False
 _lock = threading.Lock()
 
@@ -76,10 +78,12 @@ def _load_sklearn():
 
 
 def _ensure_loaded() -> tuple[str, object | None]:
-    global _pipeline, _sklearn_model, _load_attempted
+    global _pipeline, _sklearn_model, _grok_ready, _load_attempted
 
     with _lock:
         if _load_attempted:
+            if _grok_ready:
+                return "grok", "api"
             if _pipeline is not None:
                 return "hf", _pipeline
             if _sklearn_model is not None:
@@ -88,6 +92,11 @@ def _ensure_loaded() -> tuple[str, object | None]:
 
         _load_attempted = True
         backend = settings.ML_GUARD_BACKEND.lower()
+
+        if backend in {"grok", "auto"} and is_grok_configured():
+            _grok_ready = True
+            logger.info("ML guard using Grok classifier: %s", settings.ML_GUARD_GROK_MODEL)
+            return "grok", "api"
 
         if backend in {"hf", "auto", "transformers"}:
             try:
@@ -101,7 +110,10 @@ def _ensure_loaded() -> tuple[str, object | None]:
             try:
                 _sklearn_model = _load_sklearn()
                 if _sklearn_model is not None:
-                    logger.info("ML guard loaded sklearn model from %s", settings.ML_GUARD_SKLEARN_PATH)
+                    logger.info(
+                        "ML guard loaded sklearn model from %s",
+                        settings.ML_GUARD_SKLEARN_PATH,
+                    )
                     return "sklearn", _sklearn_model
             except Exception:
                 logger.exception("Failed to load sklearn fallback model")
@@ -110,10 +122,11 @@ def _ensure_loaded() -> tuple[str, object | None]:
 
 
 def reload_model() -> bool:
-    global _pipeline, _sklearn_model, _load_attempted
+    global _pipeline, _sklearn_model, _grok_ready, _load_attempted
     with _lock:
         _pipeline = None
         _sklearn_model = None
+        _grok_ready = False
         _load_attempted = False
     backend, model = _ensure_loaded()
     return model is not None
@@ -154,6 +167,18 @@ def predict_injection(text: str) -> MLPrediction:
         )
 
     try:
+        if backend == "grok":
+            injection_score, label, error = classify_prompt(normalized)
+            return MLPrediction(
+                enabled=True,
+                loaded=error is None,
+                backend="grok",
+                model_name=settings.ML_GUARD_GROK_MODEL,
+                injection_score=injection_score,
+                label=label,
+                error=error,
+            )
+
         if backend == "hf":
             raw = model(normalized)[0]
             injection_score, label = _score_from_hf_result(raw)
@@ -194,6 +219,11 @@ def predict_injection(text: str) -> MLPrediction:
 
 
 def _thresholds_for_backend(backend: str) -> tuple[float, float]:
+    if backend == "grok":
+        return (
+            settings.ML_GUARD_GROK_BLOCK_THRESHOLD,
+            settings.ML_GUARD_GROK_WARN_THRESHOLD,
+        )
     if backend == "sklearn":
         return (
             settings.ML_GUARD_SKLEARN_BLOCK_THRESHOLD,
@@ -213,14 +243,24 @@ def ml_decision(injection_score: float, backend: str = "hf") -> str | None:
 
 def classifier_status() -> dict:
     backend, model = _ensure_loaded() if settings.ML_GUARD_ENABLED else ("off", None)
+    model_name = settings.ML_GUARD_MODEL
+    block_threshold = settings.ML_GUARD_BLOCK_THRESHOLD
+    warn_threshold = settings.ML_GUARD_WARN_THRESHOLD
+
+    if backend == "grok":
+        model_name = settings.ML_GUARD_GROK_MODEL
+        block_threshold = settings.ML_GUARD_GROK_BLOCK_THRESHOLD
+        warn_threshold = settings.ML_GUARD_GROK_WARN_THRESHOLD
+
     return {
         "enabled": settings.ML_GUARD_ENABLED,
         "loaded": model is not None,
         "backend": backend if settings.ML_GUARD_ENABLED else "off",
-        "model": settings.ML_GUARD_MODEL,
+        "model": model_name,
+        "grok_configured": is_grok_configured(),
         "sklearn_path": str(settings.ML_GUARD_SKLEARN_PATH),
         "sklearn_exists": settings.ML_GUARD_SKLEARN_PATH.exists(),
-        "block_threshold": settings.ML_GUARD_BLOCK_THRESHOLD,
-        "warn_threshold": settings.ML_GUARD_WARN_THRESHOLD,
+        "block_threshold": block_threshold,
+        "warn_threshold": warn_threshold,
         "rule_id": ML_RULE_ID,
     }

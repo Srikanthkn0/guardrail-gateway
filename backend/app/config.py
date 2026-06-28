@@ -26,6 +26,7 @@ class Settings:
     )
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    XAI_API_KEY: str = os.getenv("XAI_API_KEY", "") or os.getenv("GROK_API_KEY", "")
     DEFAULT_PROVIDER: str = os.getenv("DEFAULT_PROVIDER", "auto")
     LLM_TIMEOUT_SEC: float = float(os.getenv("LLM_TIMEOUT_SEC", "60"))
     ML_GUARD_ENABLED: bool = os.getenv("ML_GUARD_ENABLED", "true").lower() in {
@@ -37,8 +38,15 @@ class Settings:
     ML_GUARD_MODEL: str = os.getenv(
         "ML_GUARD_MODEL", "fmops/distilbert-prompt-injection"
     )
+    ML_GUARD_GROK_MODEL: str = os.getenv("ML_GUARD_GROK_MODEL", "grok-3-mini")
     ML_GUARD_BLOCK_THRESHOLD: float = float(os.getenv("ML_GUARD_BLOCK_THRESHOLD", "0.85"))
     ML_GUARD_WARN_THRESHOLD: float = float(os.getenv("ML_GUARD_WARN_THRESHOLD", "0.65"))
+    ML_GUARD_GROK_BLOCK_THRESHOLD: float = float(
+        os.getenv("ML_GUARD_GROK_BLOCK_THRESHOLD", "0.75")
+    )
+    ML_GUARD_GROK_WARN_THRESHOLD: float = float(
+        os.getenv("ML_GUARD_GROK_WARN_THRESHOLD", "0.55")
+    )
     ML_GUARD_SKLEARN_BLOCK_THRESHOLD: float = float(
         os.getenv("ML_GUARD_SKLEARN_BLOCK_THRESHOLD", "0.58")
     )

@@ -67,7 +67,7 @@ def _apply_ml_to_input(phase: ScanPhaseResult, text: str) -> ScanPhaseResult:
                 severity="block",
                 match_type="model",
                 matched_text=text[:120],
-                description=f"Hugging Face / sklearn prompt-injection model ({ml.model_name})",
+                description=f"ML prompt-injection classifier ({ml.model_name}, {ml.backend})",
             )
         )
     elif ml_hit == "warn":

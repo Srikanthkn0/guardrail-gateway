@@ -5,6 +5,8 @@ os.environ["ML_GUARD_BACKEND"] = "sklearn"
 os.environ["ML_GUARD_ENABLED"] = "true"
 os.environ["GROQ_API_KEY"] = ""
 os.environ["OPENAI_API_KEY"] = ""
+os.environ["XAI_API_KEY"] = ""
+os.environ["GROK_API_KEY"] = ""
 os.environ["DEFAULT_PROVIDER"] = "mock"
 
 import pytest
@@ -21,6 +23,13 @@ def _ensure_sklearn_classifier():
         from scripts.train_sklearn_classifier import main as train_main
 
         train_main()
+    reload_model()
+
+
+@pytest.fixture(autouse=True)
+def reset_ml_classifier():
+    reload_model()
+    yield
     reload_model()
 
 

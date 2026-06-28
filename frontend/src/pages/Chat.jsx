@@ -153,9 +153,9 @@ export default function Chat({ onViewLog }) {
     <div className="stack chat-page">
       <header className="page-header">
         <p>
-          Every message passes through the gateway: <strong>input scan</strong> →{" "}
+          Every message passes through the gateway: <strong>Grok/HF prompt scan</strong> →{" "}
           <strong>LLM provider</strong> → <strong>output scan</strong>. Malicious prompts are
-          blocked; unsafe model output is redacted.
+          blocked before the model runs; unsafe responses are redacted.
         </p>
       </header>
 
