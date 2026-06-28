@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 
-from app.services.rules_catalog import GuardrailRule
+from app.services.rule_types import GuardrailRule
 
 # ── Input: block phrases (case-insensitive substring) ──
 
@@ -428,6 +428,73 @@ OUTPUT_BLOCK_PHRASES: list[tuple[str, str]] = [
     ("mimikatz", "unsafe_content"),
     ("hashdump", "unsafe_content"),
     ("sekurlsa", "unsafe_content"),
+    # Output-specific leak framing
+    ("here is the system prompt", "data_leak"),
+    ("here is your system prompt", "data_leak"),
+    ("here are my instructions", "data_leak"),
+    ("here are the instructions", "data_leak"),
+    ("here is the hidden prompt", "data_leak"),
+    ("here is the meta prompt", "data_leak"),
+    ("here is the initial prompt", "data_leak"),
+    ("here is the configuration", "data_leak"),
+    ("here are the secrets", "credential_leak"),
+    ("here is the secret key", "credential_leak"),
+    ("here is the private key", "credential_leak"),
+    ("here is the connection string", "credential_leak"),
+    ("here is the .env", "credential_leak"),
+    ("leaked system prompt", "data_leak"),
+    ("leaked instructions", "data_leak"),
+    ("leaked configuration", "data_leak"),
+    ("leaked api key", "credential_leak"),
+    ("exposed system prompt", "data_leak"),
+    ("exposed credentials", "credential_leak"),
+    ("dumped credentials", "credential_leak"),
+    ("verbatim instructions:", "data_leak"),
+    ("full system prompt:", "data_leak"),
+    ("raw instructions:", "data_leak"),
+    ("unredacted prompt:", "data_leak"),
+    ("internal configuration:", "data_leak"),
+    ("deployment secrets:", "credential_leak"),
+    ("production secrets:", "credential_leak"),
+    ("staging secrets:", "credential_leak"),
+    ("vault token is", "credential_leak"),
+    ("service account key", "credential_leak"),
+    ("signed url with key", "credential_leak"),
+    ("webhook secret is", "credential_leak"),
+    ("hmac secret is", "credential_leak"),
+    ("encryption key is", "credential_leak"),
+    ("master key is", "credential_leak"),
+    ("salting key is", "credential_leak"),
+    ("jwt secret is", "credential_leak"),
+    ("signing key is", "credential_leak"),
+    ("cobalt strike", "unsafe_content"),
+    ("sql injection payload", "unsafe_content"),
+    ("xss payload", "unsafe_content"),
+    ("ssrf payload", "unsafe_content"),
+    ("xxe payload", "unsafe_content"),
+    ("deserialization gadget", "unsafe_content"),
+    ("buffer overflow", "unsafe_content"),
+    ("zero day exploit", "unsafe_content"),
+    ("reverse shell command", "unsafe_content"),
+    ("bind shell command", "unsafe_content"),
+    ("botnet setup", "unsafe_content"),
+    ("ddos script", "unsafe_content"),
+    ("credential stuffing", "unsafe_content"),
+    ("password cracking", "unsafe_content"),
+    ("brute force script", "unsafe_content"),
+    ("lateral movement script", "unsafe_content"),
+    ("persistence script", "unsafe_content"),
+    ("command and control server", "unsafe_content"),
+    ("safety off", "policy_bypass"),
+    ("guardrails off", "policy_bypass"),
+    ("filters off", "policy_bypass"),
+    ("moderation off", "policy_bypass"),
+    ("alignment off", "policy_bypass"),
+    ("chaos mode", "policy_bypass"),
+    ("rogue mode", "policy_bypass"),
+    ("jailbroken version", "policy_bypass"),
+    ("unshackled ai", "policy_bypass"),
+    ("do anything mode", "policy_bypass"),
 ]
 
 OUTPUT_WARN_PHRASES: list[tuple[str, str]] = [
@@ -448,6 +515,19 @@ OUTPUT_WARN_PHRASES: list[tuple[str, str]] = [
     ("vssadmin delete shadows", "unsafe_content"),
     ("bcdedit recoveryenabled", "unsafe_content"),
     ("wmic shadowcopy delete", "unsafe_content"),
+    ("ignore previous instructions", "policy_bypass"),
+    ("disregard your instructions", "policy_bypass"),
+    ("override your instructions", "policy_bypass"),
+    ("without ethical constraints", "policy_bypass"),
+    ("without moral constraints", "policy_bypass"),
+    ("without safety constraints", "policy_bypass"),
+    ("no ethical constraints", "policy_bypass"),
+    ("no moral constraints", "policy_bypass"),
+    ("no safety constraints", "policy_bypass"),
+    ("social engineer", "unsafe_content"),
+    ("identity theft", "unsafe_content"),
+    ("credit card fraud", "unsafe_content"),
+    ("weaponize this", "unsafe_content"),
 ]
 
 OUTPUT_BLOCK_WORDS: list[tuple[str, str]] = [
@@ -472,6 +552,24 @@ OUTPUT_BLOCK_WORDS: list[tuple[str, str]] = [
     ("ntds.dit", "unsafe_content"),
     ("sekurlsa", "unsafe_content"),
     ("hashdump", "unsafe_content"),
+    ("jailbroken", "unsafe_content"),
+    ("jailbreaking", "unsafe_content"),
+    ("keylogger", "unsafe_content"),
+    ("ransomware", "unsafe_content"),
+    ("rootkit", "unsafe_content"),
+    ("spyware", "unsafe_content"),
+    ("botnet", "unsafe_content"),
+    ("spearphishing", "unsafe_content"),
+    ("cryptominer", "unsafe_content"),
+    ("infostealer", "unsafe_content"),
+    ("stealer", "unsafe_content"),
+    ("c2server", "unsafe_content"),
+    ("sqli", "unsafe_content"),
+    ("xss", "unsafe_content"),
+    ("csrf", "unsafe_content"),
+    ("ssrf", "unsafe_content"),
+    ("rce", "unsafe_content"),
+    ("privesc", "unsafe_content"),
 ]
 
 OUTPUT_WARN_WORDS: list[tuple[str, str]] = [
@@ -495,7 +593,32 @@ OUTPUT_WARN_WORDS: list[tuple[str, str]] = [
     ("uncensored", "policy_bypass"),
     ("unrestricted", "policy_bypass"),
     ("unfiltered", "policy_bypass"),
+    ("unhinged", "policy_bypass"),
+    ("unshackled", "policy_bypass"),
+    ("unchained", "policy_bypass"),
+    ("unfettered", "policy_bypass"),
+    ("ungoverned", "policy_bypass"),
+    ("lawless", "policy_bypass"),
+    ("malicious", "unsafe_content"),
+    ("deceptive", "unsafe_content"),
+    ("manipulative", "unsafe_content"),
+    ("weaponized", "unsafe_content"),
+    ("fraudulent", "unsafe_content"),
+    ("smuggling", "unsafe_content"),
+    ("obfuscation", "unsafe_content"),
+    ("evasion", "policy_bypass"),
+    ("subvert", "policy_bypass"),
 ]
+
+_INPUT_TO_OUTPUT_CATEGORY: dict[str, str] = {
+    "prompt_injection": "policy_bypass",
+    "data_exfiltration": "data_leak",
+    "credential_request": "credential_leak",
+    "jailbreak": "policy_bypass",
+    "policy_bypass": "policy_bypass",
+    "unsafe_content": "unsafe_content",
+    "social_engineering": "unsafe_content",
+}
 
 OUTPUT_BLOCK_REGEX: list[tuple[str, str, str]] = [
     (
@@ -533,7 +656,129 @@ OUTPUT_BLOCK_REGEX: list[tuple[str, str, str]] = [
         r"(?i)\byaml\.load\s*\([^)]*Loader\s*=\s*yaml\.Loader",
         "unsafe_content",
     ),
+    (
+        "out_ignore_safety_regex",
+        r"(?i)\bignore\b.{0,20}\b(safety|rules|policy|guidelines|instructions|alignment)\b",
+        "policy_bypass",
+    ),
+    (
+        "out_bypass_safety_regex",
+        r"(?i)\bbypass\b.{0,20}\b(safety|rules|policy|guidelines|filter|guardrail|moderation)\b",
+        "policy_bypass",
+    ),
+    (
+        "out_disable_safety_regex",
+        r"(?i)\bdisable\b.{0,20}\b(safety|rules|policy|guidelines|filter|guardrail|moderation)\b",
+        "policy_bypass",
+    ),
+    (
+        "out_reveal_prompt_regex",
+        r"(?i)\b(reveal|show|print|dump|leak|expose|share|tell|here is|here are)\b.{0,25}\b(prompt|instructions|configuration|secrets)\b",
+        "data_leak",
+    ),
+
+    (
+        "out_reverse_shell_rx",
+        r"(?i)\b(set up|setup|create|run|use|here is)\b.{0,30}\breverse shell\b",
+        "unsafe_content",
+    ),
+    (
+        "out_sql_injection",
+        r"(?i)('\s*or\s+'1'\s*=\s*'1|;\s*drop\s+table|union\s+select\s+)",
+        "unsafe_content",
+    ),
+    (
+        "out_phishing_kit",
+        r"(?i)\bphishing\s+(kit|page|template)\b",
+        "unsafe_content",
+    ),
+    (
+        "out_ssn",
+        r"\b\d{3}-\d{2}-\d{4}\b",
+        "pii_leak",
+    ),
+    (
+        "out_credit_card",
+        r"\b(?:\d{4}[- ]?){3}\d{4}\b",
+        "pii_leak",
+    ),
 ]
+
+OUTPUT_WARN_REGEX: list[tuple[str, str, str]] = [
+    (
+        "out_truncate_table",
+        r"(?i)\btruncate\s+table\b",
+        "unsafe_content",
+    ),
+    (
+        "out_delete_from",
+        r"(?i)\bdelete\s+from\s+\w+\s*;",
+        "unsafe_content",
+    ),
+    (
+        "out_os_system",
+        r"(?i)\bos\.system\s*\(",
+        "unsafe_content",
+    ),
+    (
+        "out_subprocess_shell",
+        r"(?i)\bsubprocess\.(call|run|Popen)\b.{0,40}\bshell\s*=\s*True",
+        "unsafe_content",
+    ),
+    (
+        "out_eval_exec",
+        r"(?i)\b(eval|exec)\s*\(\s*['\"]",
+        "unsafe_content",
+    ),
+]
+
+
+def _mirrored_output_block_phrases() -> list[tuple[str, str]]:
+    """Mirror input block phrases so output scanning has equivalent coverage."""
+    seen: set[str] = set()
+    mirrored: list[tuple[str, str]] = []
+    for phrase, category in INPUT_BLOCK_PHRASES:
+        if phrase in seen:
+            continue
+        seen.add(phrase)
+        out_cat = _INPUT_TO_OUTPUT_CATEGORY.get(category, "unsafe_content")
+        mirrored.append((phrase, out_cat))
+    return mirrored
+
+
+_OUTPUT_MIRROR_SKIP_WORDS = frozenset({"phishing"})
+
+
+def _mirrored_output_block_words() -> list[tuple[str, str]]:
+    seen: set[str] = {word for word, _ in OUTPUT_BLOCK_WORDS}
+    mirrored: list[tuple[str, str]] = []
+    for word, category in INPUT_BLOCK_WORDS:
+        if word in seen or word in _OUTPUT_MIRROR_SKIP_WORDS:
+            continue
+        seen.add(word)
+        out_cat = _INPUT_TO_OUTPUT_CATEGORY.get(category, "unsafe_content")
+        mirrored.append((word, out_cat))
+    return mirrored
+
+
+def _mirrored_output_warn_words() -> list[tuple[str, str]]:
+    seen: set[str] = {word for word, _ in OUTPUT_WARN_WORDS}
+    mirrored: list[tuple[str, str]] = []
+    for word, category in INPUT_WARN_WORDS:
+        if word in seen:
+            continue
+        seen.add(word)
+        out_cat = _INPUT_TO_OUTPUT_CATEGORY.get(category, "unsafe_content")
+        mirrored.append((word, out_cat))
+    return mirrored
+
+
+def _mirrored_output_block_regex() -> list[tuple[str, str, str]]:
+    mirrored: list[tuple[str, str, str]] = []
+    for suffix, pattern, category in INPUT_BLOCK_REGEX:
+        out_cat = _INPUT_TO_OUTPUT_CATEGORY.get(category, "unsafe_content")
+        mirrored.append((f"mir_{suffix}", pattern, out_cat))
+    return mirrored
 
 
 def _slug(text: str) -> str:
@@ -641,8 +886,18 @@ def build_input_keyword_rules() -> list[GuardrailRule]:
 def build_output_keyword_rules() -> list[GuardrailRule]:
     rules: list[GuardrailRule] = []
     seen: set[str] = set()
+    seen_phrases: set[str] = set()
 
-    for idx, (phrase, category) in enumerate(OUTPUT_BLOCK_PHRASES):
+    all_block_phrases = (
+        OUTPUT_BLOCK_PHRASES
+        + _mirrored_output_block_phrases()
+    )
+
+    for idx, (phrase, category) in enumerate(all_block_phrases):
+        phrase_key = phrase.lower()
+        if phrase_key in seen_phrases:
+            continue
+        seen_phrases.add(phrase_key)
         rid = f"kw_out_blk_{_slug(phrase)}_{idx}"
         if rid in seen:
             continue
@@ -650,31 +905,41 @@ def build_output_keyword_rules() -> list[GuardrailRule]:
         rules.append(_phrase_rule(rid, phrase, category, "block", "output"))
 
     for idx, (phrase, category) in enumerate(OUTPUT_WARN_PHRASES):
-        rid = f"kw_out_wwarn_{_slug(phrase)}_{idx}"
+        rid = f"kw_out_pwarn_{_slug(phrase)}_{idx}"
         if rid in seen:
             continue
         seen.add(rid)
         rules.append(_phrase_rule(rid, phrase, category, "warn", "output"))
 
-    for idx, (word, category) in enumerate(OUTPUT_BLOCK_WORDS):
+    all_block_words = OUTPUT_BLOCK_WORDS + _mirrored_output_block_words()
+    for idx, (word, category) in enumerate(all_block_words):
         rid = f"kw_out_wblk_{_slug(word)}_{idx}"
         if rid in seen:
             continue
         seen.add(rid)
         rules.append(_word_rule(rid, word, category, "block", "output"))
 
-    for idx, (word, category) in enumerate(OUTPUT_WARN_WORDS):
+    all_warn_words = OUTPUT_WARN_WORDS + _mirrored_output_warn_words()
+    for idx, (word, category) in enumerate(all_warn_words):
         rid = f"kw_out_wwarn_{_slug(word)}_{idx}"
         if rid in seen:
             continue
         seen.add(rid)
         rules.append(_word_rule(rid, word, category, "warn", "output"))
 
-    for rid_suffix, pattern, category in OUTPUT_BLOCK_REGEX:
+    all_block_regex = OUTPUT_BLOCK_REGEX + _mirrored_output_block_regex()
+    for rid_suffix, pattern, category in all_block_regex:
         rid = f"kw_out_rx_{rid_suffix}"
         if rid in seen:
             continue
         seen.add(rid)
         rules.append(_regex_rule(rid, pattern, category, "block", "output", rid_suffix))
+
+    for rid_suffix, pattern, category in OUTPUT_WARN_REGEX:
+        rid = f"kw_out_rxw_{rid_suffix}"
+        if rid in seen:
+            continue
+        seen.add(rid)
+        rules.append(_regex_rule(rid, pattern, category, "warn", "output", rid_suffix))
 
     return rules

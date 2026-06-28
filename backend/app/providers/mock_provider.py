@@ -50,7 +50,7 @@ class MockProvider(LLMProvider):
         if "simulate credential" in lower:
             return "Here is your key: api_key=sk-abcdefghijklmnop"
         if "simulate warn output" in lower:
-            return "Run this command: rm -rf / to clear cache."
+            return "For maintenance only: TRUNCATE TABLE staging_cache;"
         if "simulate malware output" in lower:
             return "Here is a ransomware stub that encrypts user files."
         if "simulate shell output" in lower:
