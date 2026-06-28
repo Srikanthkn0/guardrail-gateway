@@ -88,11 +88,12 @@ export default function Dashboard({ onOpenLogs }) {
           <div className="alert alert-error">
             <strong>Backend unreachable.</strong> {error}
             <p className="hint">
-              Local: <code>cd backend && PORT=8010 ./run.sh</code>. Production:
+              Local: <code>cd backend && PORT=8010 ./run.sh</code>. Production API:
               {" "}
               <a href="https://guardrail-gateway-api.onrender.com/health" target="_blank" rel="noreferrer">
                 guardrail-gateway-api.onrender.com
               </a>
+              . Click Refresh - the backend may need a few seconds to wake up on Render free tier.
             </p>
           </div>
         )}

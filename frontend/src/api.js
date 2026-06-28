@@ -1,4 +1,8 @@
 const PRODUCTION_API_URL = "https://guardrail-gateway-api.onrender.com";
+const PROXY_PREFIX = "/api";
+const REQUEST_TIMEOUT_MS = 90_000;
+const NETWORK_RETRY_ATTEMPTS = 3;
+const NETWORK_RETRY_DELAY_MS = 2000;
 
 function resolveApiBaseUrl() {
   const configured = import.meta.env.VITE_API_BASE_URL?.trim() || "";
@@ -9,7 +13,7 @@ function resolveApiBaseUrl() {
     if (configured && !isLocalhost) {
       return configured;
     }
-    return PRODUCTION_API_URL;
+    return "";
   }
 
   return configured || "http://localhost:8000";
@@ -17,10 +21,15 @@ function resolveApiBaseUrl() {
 
 const API_BASE_URL = resolveApiBaseUrl();
 const API_KEY = import.meta.env.VITE_GATEWAY_API_KEY?.trim() || "";
-const REQUEST_TIMEOUT_MS = 90_000;
 
 export function getApiBaseUrl() {
-  return API_BASE_URL || PRODUCTION_API_URL;
+  if (API_BASE_URL) {
+    return API_BASE_URL;
+  }
+  if (import.meta.env.PROD && typeof window !== "undefined") {
+    return `${window.location.origin}${PROXY_PREFIX}`;
+  }
+  return "http://localhost:8000";
 }
 
 function apiHeaders(extra = {}) {
@@ -31,12 +40,24 @@ function apiHeaders(extra = {}) {
   return headers;
 }
 
-async function fetchWithTimeout(url, options = {}) {
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isRetryableNetworkError(err) {
+  return err instanceof TypeError || err.name === "AbortError";
+}
+
+async function fetchWithTimeout(url, options = {}, attempt = 1) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
     return await fetch(url, { ...options, signal: controller.signal });
   } catch (err) {
+    if (attempt < NETWORK_RETRY_ATTEMPTS && isRetryableNetworkError(err)) {
+      await sleep(NETWORK_RETRY_DELAY_MS * attempt);
+      return fetchWithTimeout(url, options, attempt + 1);
+    }
     if (err.name === "AbortError") {
       throw new Error(
         "Request timed out. The Render backend may be waking up - retry in a moment.",
@@ -44,8 +65,9 @@ async function fetchWithTimeout(url, options = {}) {
     }
     if (err instanceof TypeError) {
       throw new Error(
-        "Network error reaching the API. Check https://guardrail-gateway-api.onrender.com/health "
-        + "or restart the Render service.",
+        "Network error reaching the API. The Render service may be waking up. "
+        + "Wait a few seconds and click Refresh, or check "
+        + "https://guardrail-gateway-api.onrender.com/health",
       );
     }
     throw err;
@@ -60,7 +82,7 @@ async function parseResponse(response) {
     if (response.status === 502 || response.status === 503) {
       throw new Error(
         "API unavailable (502/503). The Render backend may be down or redeploying. "
-        + "Check https://guardrail-gateway-api.onrender.com/health or restart the service in Render.",
+        + "Wait a moment and click Refresh.",
       );
     }
     const detail = data.detail || `Request failed (${response.status})`;
@@ -70,7 +92,10 @@ async function parseResponse(response) {
 }
 
 function apiUrl(path) {
-  return `${getApiBaseUrl()}${path}`;
+  if (!API_BASE_URL) {
+    return `${PROXY_PREFIX}${path}`;
+  }
+  return `${API_BASE_URL}${path}`;
 }
 
 export async function fetchHealth() {

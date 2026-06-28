@@ -3,38 +3,7 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
-    {
-      "source": "/health/:path*",
-      "destination": "https://guardrail-gateway-api.onrender.com/health/:path*"
-    },
-    {
-      "source": "/health",
-      "destination": "https://guardrail-gateway-api.onrender.com/health"
-    },
-    {
-      "source": "/rules/:path*",
-      "destination": "https://guardrail-gateway-api.onrender.com/rules/:path*"
-    },
-    {
-      "source": "/rules",
-      "destination": "https://guardrail-gateway-api.onrender.com/rules"
-    },
-    {
-      "source": "/gateway/:path*",
-      "destination": "https://guardrail-gateway-api.onrender.com/gateway/:path*"
-    },
-    {
-      "source": "/logs/:path*",
-      "destination": "https://guardrail-gateway-api.onrender.com/logs/:path*"
-    },
-    {
-      "source": "/logs",
-      "destination": "https://guardrail-gateway-api.onrender.com/logs"
-    },
-    {
-      "source": "/stats",
-      "destination": "https://guardrail-gateway-api.onrender.com/stats"
-    },
+    { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
