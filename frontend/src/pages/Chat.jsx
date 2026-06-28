@@ -137,14 +137,6 @@ export default function Chat({ onViewLog }) {
 
   return (
     <div className="stack chat-page">
-      <header className="page-header">
-        <p>
-          Every message passes through the gateway: <strong>Grok/HF prompt scan</strong> -&gt;{" "}
-          <strong>LLM provider</strong> -&gt; <strong>output scan</strong>. Malicious prompts are
-          blocked before the model runs; unsafe responses are redacted.
-        </p>
-      </header>
-
       {!loadingProviders && (
         <div className={`provider-banner ${usingRealLlm ? "provider-banner-live" : ""}`}>
           {usingRealLlm ? (
@@ -167,30 +159,7 @@ export default function Chat({ onViewLog }) {
         <section className="card chat-panel">
           <div className="chat-thread">
             {messages.length === 0 && !sending && (
-              <div className="chat-empty">
-                <div className="chat-empty-icon" aria-hidden="true">
-                  <svg viewBox="0 0 48 48" fill="none">
-                    <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="1.25" opacity="0.35" />
-                    <path
-                      d="M24 10L34 14.5V21C34 26.8 29.8 31.2 24 33C18.2 31.2 14 26.8 14 21V14.5L24 10Z"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M19 22H22V25H26V22H29"
-                      stroke="currentColor"
-                      strokeWidth="1.75"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-                <p className="chat-empty-title">Gateway ready</p>
-                <p className="status-text">
-                  Every message is scanned on input and output. Try a normal question or use sample
-                  chips to test blocks and redaction.
-                </p>
-              </div>
+              <p className="status-text chat-empty">No messages yet. Send a prompt or pick a sample below.</p>
             )}
 
             {messages.map((message) => (

@@ -8,34 +8,13 @@ import Rules from "./pages/Rules.jsx";
 import { fetchLiveness, fetchRules } from "./api.js";
 
 const NAV_ITEMS = [
-  {
-    id: "dashboard",
-    label: "Overview",
-    icon: "dashboard",
-    description: "System health, pipeline metrics, and live status",
-  },
-  {
-    id: "rules",
-    label: "Rules",
-    icon: "rules",
-    description: "Test input & output guardrails - 900+ patterns",
-  },
-  {
-    id: "chat",
-    label: "Chat",
-    icon: "chat",
-    description: "Live LLM proxy with full gateway inspection",
-  },
-  {
-    id: "logs",
-    label: "Logs",
-    icon: "logs",
-    description: "Audit trail for every request and decision",
-  },
+  { id: "dashboard", label: "Overview", icon: "dashboard" },
+  { id: "rules", label: "Rules", icon: "rules" },
+  { id: "chat", label: "Chat", icon: "chat" },
+  { id: "logs", label: "Logs", icon: "logs" },
 ];
 
 const GITHUB_URL = "https://github.com/Srikanthkn0/guardrail-gateway";
-const LIVE_URL = "https://guardrail-gateway.vercel.app";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -81,8 +60,7 @@ export default function App() {
     <div className="app-shell">
       <aside className="sidebar">
         <div className="sidebar-brand">
-          <Logo size={42} showWordmark />
-          <p className="sidebar-tagline">LLM safety gateway</p>
+          <Logo size={32} showWordmark />
         </div>
 
         <nav className="sidebar-nav" aria-label="Main">
@@ -94,37 +72,17 @@ export default function App() {
               onClick={() => setActiveTab(item.id)}
             >
               <NavIcon name={item.icon} />
-              <span className="sidebar-link-text">
-                <span className="sidebar-link-label">{item.label}</span>
-                {activeTab === item.id && (
-                  <span className="sidebar-link-desc">{item.description}</span>
-                )}
-              </span>
+              <span className="sidebar-link-label">{item.label}</span>
             </button>
           ))}
         </nav>
 
-        <div className="sidebar-meta">
-          {ruleCount != null && (
-            <div className="sidebar-stat">
-              <span className="sidebar-stat-value">{ruleCount.toLocaleString()}</span>
-              <span className="sidebar-stat-label">guardrail rules</span>
-            </div>
-          )}
-          <div className="sidebar-stat">
-            <span className="sidebar-stat-value">In + Out</span>
-            <span className="sidebar-stat-label">dual scanning</span>
-          </div>
-        </div>
-
         <div className="sidebar-footer">
+          {ruleCount != null && (
+            <span className="sidebar-footnote">{ruleCount.toLocaleString()} rules loaded</span>
+          )}
           <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="sidebar-github">
-            <NavIcon name="github" />
-            Source
-            <NavIcon name="external" className="nav-icon-external" />
-          </a>
-          <a href={LIVE_URL} className="sidebar-version" title="Production URL">
-            guardrail-gateway.vercel.app
+            GitHub
           </a>
         </div>
       </aside>
@@ -132,37 +90,17 @@ export default function App() {
       <div className="app-body">
         <header className="topbar">
           <div className="topbar-title">
-            <div className="topbar-heading">
-              <p className="topbar-eyebrow">Guardrail Gateway</p>
-              <h1>{activeItem.label}</h1>
-              <p className="topbar-subtitle">{activeItem.description}</p>
-            </div>
-            <div className="topbar-actions">
-              <span className="topbar-status">
-                <span
-                  className={`status-dot ${apiOnline === false ? "status-dot-offline" : ""}`}
-                />
-                {apiOnline === null && "Checking API..."}
-                {apiOnline === true && "API online"}
-                {apiOnline === false && "API unreachable"}
-              </span>
-              {ruleCount != null && (
-                <span className="topbar-pill">{ruleCount.toLocaleString()} rules active</span>
-              )}
-              {activeTab !== "chat" && (
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm-inline"
-                  onClick={() => setActiveTab("chat")}
-                >
-                  Try live chat
-                </button>
-              )}
-            </div>
+            <h1>{activeItem.label}</h1>
+            <span className="topbar-status">
+              <span className={`status-dot ${apiOnline === false ? "status-dot-offline" : ""}`} />
+              {apiOnline === null && "Checking API..."}
+              {apiOnline === true && "API online"}
+              {apiOnline === false && "API offline"}
+            </span>
           </div>
         </header>
 
-        <main className={`main-content page-enter ${isWidePage ? "main-content-wide" : ""}`}>
+        <main className={`main-content ${isWidePage ? "main-content-wide" : ""}`}>
           {activeTab === "dashboard" && (
             <Dashboard onOpenLogs={openLogs} onOpenChat={() => setActiveTab("chat")} ruleCount={ruleCount} />
           )}

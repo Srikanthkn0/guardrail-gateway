@@ -305,13 +305,13 @@ export default function Logs({ focusRequestId, onFocusHandled }) {
                 <div className="status-list-item">
                   <span className="label">Input</span>
                   <span className="value">
-                    <DecisionBadge decision={detail.input_decision} showDot={false} />
+                    <DecisionBadge decision={detail.input_decision} />
                   </span>
                 </div>
                 <div className="status-list-item">
                   <span className="label">Output</span>
                   <span className="value">
-                    <DecisionBadge decision={detail.output_decision || "allow"} showDot={false} />
+                    <DecisionBadge decision={detail.output_decision || "allow"} />
                   </span>
                 </div>
                 <div className="status-list-item">
