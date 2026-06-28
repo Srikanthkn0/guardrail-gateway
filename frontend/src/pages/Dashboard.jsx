@@ -15,7 +15,7 @@ const PIPELINE_STEPS = [
 const FEATURES = [
   {
     title: "Hybrid guard engine",
-    desc: "Deterministic rules layered with ML cascade — Grok judge, sklearn, and HuggingFace fallback.",
+    desc: "Deterministic rules layered with ML cascade - Grok judge, sklearn, and HuggingFace fallback.",
     tag: "Core",
   },
   {
@@ -173,21 +173,21 @@ export default function Dashboard({ onOpenLogs, onOpenChat, ruleCount }) {
         <div className="hero-metrics">
           <div className="hero-metric hero-metric-highlight">
             <span className="hero-metric-value accent">
-              {ruleCount != null ? ruleCount.toLocaleString() : "—"}
+              {ruleCount != null ? ruleCount.toLocaleString() : "n/a"}
             </span>
             <span className="hero-metric-label">Guardrail rules</span>
           </div>
           <div className="hero-metric">
-            <span className="hero-metric-value">{availableProviders || "—"}</span>
+            <span className="hero-metric-value">{availableProviders || "n/a"}</span>
             <span className="hero-metric-label">Providers live</span>
           </div>
           <div className="hero-metric">
-            <span className="hero-metric-value">{stats?.total_requests ?? "—"}</span>
+            <span className="hero-metric-value">{stats?.total_requests ?? "n/a"}</span>
             <span className="hero-metric-label">Requests logged</span>
           </div>
           <div className="hero-metric">
             <span className={`hero-metric-value ${mlHealth?.loaded ? "accent" : ""}`}>
-              {mlHealth?.loaded ? "Active" : mlHealth ? "Idle" : "—"}
+              {mlHealth?.loaded ? "Active" : mlHealth ? "Idle" : "n/a"}
             </span>
             <span className="hero-metric-label">ML scanner</span>
           </div>

@@ -66,7 +66,7 @@ body::before {
   mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, black 20%, transparent 85%);
 }
 
-/* ── Shell layout ── */
+/* -- Shell layout -- */
 
 .app-shell {
   display: flex;
@@ -437,7 +437,7 @@ body::before {
   }
 }
 
-/* ── Page structure ── */
+/* -- Page structure -- */
 
 .stack {
   display: flex;
@@ -457,7 +457,7 @@ body::before {
   font-size: 13px;
 }
 
-/* ── Hero ── */
+/* -- Hero -- */
 
 .hero {
   display: grid;
@@ -587,7 +587,7 @@ body::before {
   color: var(--text-faint);
 }
 
-/* ── Features ── */
+/* -- Features -- */
 
 .feature-grid {
   display: grid;
@@ -639,7 +639,7 @@ body::before {
   color: var(--text-muted);
 }
 
-/* ── Tech stack ── */
+/* -- Tech stack -- */
 
 .tech-stack {
   display: flex;
@@ -665,7 +665,7 @@ body::before {
   border-color: rgba(16, 185, 129, 0.25);
 }
 
-/* ── Pipeline flow ── */
+/* -- Pipeline flow -- */
 
 .pipeline {
   padding: 20px 24px 24px;
@@ -791,7 +791,7 @@ body::before {
   box-shadow: 0 0 8px var(--accent-glow);
 }
 
-/* ── Stat cards ── */
+/* -- Stat cards -- */
 
 .stat-grid {
   display: grid;
@@ -840,7 +840,7 @@ body::before {
   color: var(--fail);
 }
 
-/* ── Cards ── */
+/* -- Cards -- */
 
 .card {
   background: rgba(7, 10, 14, 0.85);
@@ -895,7 +895,7 @@ body::before {
   gap: 16px;
 }
 
-/* ── ML status card ── */
+/* -- ML status card -- */
 
 .ml-card {
   padding: 16px 18px;
@@ -965,7 +965,7 @@ body::before {
   word-break: break-all;
 }
 
-/* ── Status list ── */
+/* -- Status list -- */
 
 .status-list {
   display: grid;
@@ -1006,7 +1006,7 @@ body::before {
   font-size: 13px;
 }
 
-/* ── Alerts ── */
+/* -- Alerts -- */
 
 .alert {
   padding: 12px 14px;
@@ -1052,7 +1052,7 @@ code {
   color: var(--accent-bright);
 }
 
-/* ── Chips ── */
+/* -- Chips -- */
 
 .chip-row {
   display: flex;
@@ -1110,7 +1110,7 @@ code {
   border-color: rgba(52, 211, 153, 0.4);
 }
 
-/* ── Badges ── */
+/* -- Badges -- */
 
 .badge {
   display: inline-flex;
@@ -1163,7 +1163,7 @@ code {
   background: var(--fail);
 }
 
-/* ── Scan panel ── */
+/* -- Scan panel -- */
 
 .scan-panel {
   margin-top: 14px;
@@ -1224,7 +1224,7 @@ code {
   background: var(--fail);
 }
 
-/* ── Result blocks ── */
+/* -- Result blocks -- */
 
 .result-block {
   margin-top: 16px;
@@ -1241,7 +1241,7 @@ code {
   font-size: 13px;
 }
 
-/* ── Tables ── */
+/* -- Tables -- */
 
 .table-wrap {
   overflow-x: auto;
@@ -1283,7 +1283,7 @@ code {
   white-space: nowrap;
 }
 
-/* ── Forms ── */
+/* -- Forms -- */
 
 .form {
   display: flex;
@@ -1330,7 +1330,7 @@ code {
   box-shadow: 0 0 0 2px var(--accent-dim), 0 0 16px rgba(16, 185, 129, 0.1);
 }
 
-/* ── Buttons ── */
+/* -- Buttons -- */
 
 .btn {
   display: inline-flex;
@@ -1390,7 +1390,7 @@ code {
   font-size: 12px;
 }
 
-/* ── Response box ── */
+/* -- Response box -- */
 
 .response-box {
   margin-top: 12px;
@@ -1415,7 +1415,7 @@ code {
   word-break: break-word;
 }
 
-/* ── Toolbar ── */
+/* -- Toolbar -- */
 
 .toolbar {
   display: flex;
@@ -1493,7 +1493,7 @@ code {
   margin-top: 12px;
 }
 
-/* ── Bar chart ── */
+/* -- Bar chart -- */
 
 .bar-chart {
   margin-top: 12px;
@@ -1540,7 +1540,7 @@ code {
   background: var(--fail);
 }
 
-/* ── Chat page ── */
+/* -- Chat page -- */
 
 .chat-page .page-header strong {
   color: var(--accent);
@@ -1685,7 +1685,7 @@ code {
   overflow-y: auto;
 }
 
-/* ── Gateway flow ── */
+/* -- Gateway flow -- */
 
 .gateway-flow {
   display: flex;
@@ -1796,7 +1796,7 @@ code {
   margin-bottom: 6px;
 }
 
-/* ── Rules page ── */
+/* -- Rules page -- */
 
 .rules-summary {
   display: flex;
@@ -1876,7 +1876,7 @@ code {
   box-shadow: 0 0 12px rgba(16, 185, 129, 0.1);
 }
 
-/* ── Chat polish ── */
+/* -- Chat polish -- */
 
 .chat-empty {
   display: flex;
@@ -1964,7 +1964,7 @@ code {
   background: rgba(0, 0, 0, 0.3);
 }
 
-/* ── Logs page ── */
+/* -- Logs page -- */
 
 .logs-page {
   gap: 16px;
@@ -2127,7 +2127,7 @@ code {
   border-radius: var(--radius-sm);
 }
 
-/* ── Responsive ── */
+/* -- Responsive -- */
 
 @media (max-width: 900px) {
   .hero {

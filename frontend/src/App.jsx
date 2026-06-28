@@ -18,7 +18,7 @@ const NAV_ITEMS = [
     id: "rules",
     label: "Rules",
     icon: "rules",
-    description: "Test input & output guardrails — 900+ patterns",
+    description: "Test input & output guardrails - 900+ patterns",
   },
   {
     id: "chat",
@@ -142,7 +142,7 @@ export default function App() {
                 <span
                   className={`status-dot ${apiOnline === false ? "status-dot-offline" : ""}`}
                 />
-                {apiOnline === null && "Checking API…"}
+                {apiOnline === null && "Checking API..."}
                 {apiOnline === true && "API online"}
                 {apiOnline === false && "API unreachable"}
               </span>

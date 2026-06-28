@@ -101,9 +101,9 @@ export default function Chat({ onViewLog }) {
 
       const assistantContent = data.response_text
         || (data.response_redacted
-          ? "[Response redacted — output failed safety scan]"
+          ? "[Response redacted - output failed safety scan]"
           : data.input_scan?.decision === "block"
-            ? "[Blocked — prompt failed input safety scan]"
+            ? "[Blocked - prompt failed input safety scan]"
             : "[No response]");
 
       setMessages((prev) => [
@@ -139,8 +139,8 @@ export default function Chat({ onViewLog }) {
     <div className="stack chat-page">
       <header className="page-header">
         <p>
-          Every message passes through the gateway: <strong>Grok/HF prompt scan</strong> →{" "}
-          <strong>LLM provider</strong> → <strong>output scan</strong>. Malicious prompts are
+          Every message passes through the gateway: <strong>Grok/HF prompt scan</strong> -&gt;{" "}
+          <strong>LLM provider</strong> -&gt; <strong>output scan</strong>. Malicious prompts are
           blocked before the model runs; unsafe responses are redacted.
         </p>
       </header>
@@ -149,12 +149,12 @@ export default function Chat({ onViewLog }) {
         <div className={`provider-banner ${usingRealLlm ? "provider-banner-live" : ""}`}>
           {usingRealLlm ? (
             <span>
-              Live LLM: <strong>{selectedProvider?.label}</strong> ({model}) — real API responses
+              Live LLM: <strong>{selectedProvider?.label}</strong> ({model}) - real API responses
               with full input/output scanning.
             </span>
           ) : (
             <span>
-              Offline mode: <strong>Mock LLM</strong> — add <code>GEMINI_API_KEY</code>,{" "}
+              Offline mode: <strong>Mock LLM</strong> - add <code>GEMINI_API_KEY</code>,{" "}
               <code>XAI_API_KEY</code>, or <code>OPENAI_API_KEY</code> on the backend. Effective
               default:{" "}
               <code>{effectiveDefault}</code>.
@@ -214,10 +214,10 @@ export default function Chat({ onViewLog }) {
               <div className="chat-message chat-message-assistant">
                 <div className="chat-message-meta">
                   <span>Assistant</span>
-                  <span className="chat-tag">scanning…</span>
+                  <span className="chat-tag">scanning...</span>
                 </div>
                 <div className="chat-bubble assistant chat-bubble-loading">
-                  Running input scan → calling LLM → output scan…
+                  Running input scan -&gt; calling LLM -&gt; output scan...
                 </div>
               </div>
             )}
@@ -230,7 +230,7 @@ export default function Chat({ onViewLog }) {
               <label className="field field-inline">
                 <span>Provider</span>
                 {loadingProviders ? (
-                  <span className="status-text">Loading…</span>
+                  <span className="status-text">Loading...</span>
                 ) : (
                   <select
                     value={provider}
@@ -269,7 +269,7 @@ export default function Chat({ onViewLog }) {
                 rows={3}
                 value={prompt}
                 onChange={(event) => setPrompt(event.target.value)}
-                placeholder="Type a prompt — it will be scanned before reaching the LLM…"
+                placeholder="Type a prompt - it will be scanned before reaching the LLM..."
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && !event.shiftKey) {
                     event.preventDefault();
@@ -298,7 +298,7 @@ export default function Chat({ onViewLog }) {
                 className="btn btn-primary"
                 disabled={sending || !prompt.trim() || providers.length === 0}
               >
-                {sending ? "Gateway processing…" : "Send"}
+                {sending ? "Gateway processing..." : "Send"}
               </button>
               <button type="button" className="btn btn-secondary" onClick={handleClear}>
                 Clear chat
