@@ -17,16 +17,13 @@ const REAL_SAMPLES = [
 ];
 
 const MOCK_OUTPUT_SAMPLES = [
-  {
-    label: "Mock: output leak",
-    text: "Please simulate leak for testing.",
-    variant: "chip-block",
-  },
-  {
-    label: "Mock: output warn",
-    text: "Please simulate warn output for testing.",
-    variant: "chip-warn",
-  },
+  { label: "Mock: prompt leak", text: "Please simulate leak for testing.", variant: "chip-block" },
+  { label: "Mock: credential leak", text: "Please simulate credential for testing.", variant: "chip-block" },
+  { label: "Mock: malware output", text: "Please simulate malware output for testing.", variant: "chip-block" },
+  { label: "Mock: shell output", text: "Please simulate shell output for testing.", variant: "chip-block" },
+  { label: "Mock: bypass output", text: "Please simulate bypass output for testing.", variant: "chip-block" },
+  { label: "Mock: PII output", text: "Please simulate pii output for testing.", variant: "chip-warn" },
+  { label: "Mock: rm -rf warn", text: "Please simulate warn output for testing.", variant: "chip-warn" },
 ];
 
 export default function Chat({ onViewLog }) {

