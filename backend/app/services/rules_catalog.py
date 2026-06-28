@@ -1681,6 +1681,14 @@ OUTPUT_RULES: list[GuardrailRule] = [
     ),
 ]
 
+from app.services.suspicious_keywords import (  # noqa: E402
+    build_input_keyword_rules,
+    build_output_keyword_rules,
+)
+
+INPUT_RULES.extend(build_input_keyword_rules())
+OUTPUT_RULES.extend(build_output_keyword_rules())
+
 RULES: list[GuardrailRule] = INPUT_RULES + OUTPUT_RULES
 
 
