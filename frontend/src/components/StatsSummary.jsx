@@ -31,8 +31,45 @@ function DecisionBars({ stats }) {
   );
 }
 
-export default function StatsSummary({ stats, showBars = true, showProviders = true }) {
+export default function StatsSummary({
+  stats,
+  showBars = true,
+  showProviders = true,
+  compact = false,
+}) {
   if (!stats) return null;
+
+  if (compact) {
+    return (
+      <>
+        {showBars && <DecisionBars stats={stats} />}
+        {showProviders && stats.by_provider?.length > 0 && (
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Provider</th>
+                  <th>Requests</th>
+                  <th>Avg latency</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.by_provider.map((row) => (
+                  <tr key={row.provider}>
+                    <td>{row.provider}</td>
+                    <td>{row.count}</td>
+                    <td>
+                      {row.avg_latency_ms != null ? `${Math.round(row.avg_latency_ms)} ms` : "n/a"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </>
+    );
+  }
 
   return (
     <>

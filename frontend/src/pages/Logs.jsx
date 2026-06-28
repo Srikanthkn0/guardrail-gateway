@@ -116,7 +116,6 @@ export default function Logs({ focusRequestId, onFocusHandled }) {
   return (
     <div className="stack">
       <header className="page-header">
-        <h2>Logs</h2>
         <p>Gateway requests stored in SQLite. Click a row for rule hits.</p>
       </header>
 

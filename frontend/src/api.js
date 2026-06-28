@@ -43,6 +43,11 @@ export async function fetchHealth() {
   return parseResponse(response);
 }
 
+export async function fetchMlHealth() {
+  const response = await fetch(apiUrl("/health/ml"));
+  return parseResponse(response);
+}
+
 export async function fetchRules() {
   const response = await fetch(apiUrl("/rules"));
   return parseResponse(response);

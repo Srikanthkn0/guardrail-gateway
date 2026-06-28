@@ -1,11 +1,20 @@
 import { useEffect, useState } from "react";
 import StatsSummary from "../components/StatsSummary.jsx";
 import DecisionBadge from "../components/DecisionBadge.jsx";
-import { fetchHealth, fetchLogs, fetchStats, getApiBaseUrl } from "../api.js";
+import { fetchHealth, fetchLogs, fetchMlHealth, fetchStats, getApiBaseUrl } from "../api.js";
 import { formatTime } from "../utils/format.js";
+
+const PIPELINE_STEPS = [
+  { icon: "↓", label: "Input", desc: "User prompt" },
+  { icon: "⬡", label: "Rules + ML", desc: "Hybrid scan", active: true },
+  { icon: "▸", label: "Provider", desc: "LLM call" },
+  { icon: "↑", label: "Output", desc: "Response scan" },
+  { icon: "≡", label: "Log", desc: "SQLite store" },
+];
 
 export default function Dashboard({ onOpenLogs }) {
   const [health, setHealth] = useState(null);
+  const [mlHealth, setMlHealth] = useState(null);
   const [stats, setStats] = useState(null);
   const [recentLogs, setRecentLogs] = useState([]);
   const [error, setError] = useState(null);
@@ -16,13 +25,15 @@ export default function Dashboard({ onOpenLogs }) {
 
     async function load() {
       try {
-        const [healthData, statsData, logsData] = await Promise.all([
+        const [healthData, mlData, statsData, logsData] = await Promise.all([
           fetchHealth(),
+          fetchMlHealth().catch(() => null),
           fetchStats().catch(() => null),
           fetchLogs({ limit: 5 }).catch(() => ({ logs: [] })),
         ]);
         if (!cancelled) {
           setHealth(healthData);
+          setMlHealth(mlData);
           setStats(statsData);
           setRecentLogs(logsData.logs || []);
           setError(null);
@@ -45,92 +56,162 @@ export default function Dashboard({ onOpenLogs }) {
     };
   }, []);
 
+  function mlBadgeClass() {
+    if (!mlHealth?.enabled) return "ml-badge-off";
+    if (mlHealth.loaded) return "ml-badge-ready";
+    return "ml-badge-error";
+  }
+
+  function mlBadgeLabel() {
+    if (!mlHealth?.enabled) return "disabled";
+    if (mlHealth.loaded) return "ready";
+    return "not loaded";
+  }
+
   return (
     <div className="stack">
-      <section className="hero-card">
-        <div className="hero-content">
-          <h2>LLM safety at the gateway layer</h2>
-          <p>
-            Scan inputs and outputs with rules plus ML classification, route allowed prompts to
-            providers, and log every decision with full traceability.
-          </p>
-          <div className="pill-row">
-            <span className="pill">Hybrid guard</span>
-            <span className="pill pill-secondary">ML classifier</span>
-            <span className="pill">Request logs</span>
-          </div>
-        </div>
-      </section>
-
-      <header className="page-header">
-        <h2>Overview</h2>
-        <p>Gateway health, decision breakdown, and recent traffic.</p>
-      </header>
-
-      <section className="card">
-        <h3>Backend</h3>
-
-        <div className="status-list">
-          <div className="status-list-item">
-            <span className="label">API URL</span>
-            <span className="value mono">{getApiBaseUrl()}</span>
-          </div>
-        </div>
-
-        {loading && <p className="status-text">Checking backend...</p>}
-
-        {error && (
-          <div className="alert alert-error">
-            <strong>Backend unreachable.</strong> {error}
-            <p className="hint">
-              Local: start the API on port 8000 or 8010. Production uses the Vercel proxy.
-            </p>
-          </div>
-        )}
-
-        {health && (
-          <div className="status-list">
-            <div className="status-list-item">
-              <span className="label">Status</span>
-              <span className="value">{health.status}</span>
+      <section className="pipeline" aria-label="Gateway pipeline">
+        {PIPELINE_STEPS.map((step, index) => (
+          <div key={step.label} style={{ display: "contents" }}>
+            <div className={`pipeline-step ${step.active ? "pipeline-step-active" : ""}`}>
+              <div className="pipeline-icon">{step.icon}</div>
+              <span className="pipeline-label">{step.label}</span>
+              <span className="pipeline-desc">{step.desc}</span>
             </div>
-            <div className="status-list-item">
-              <span className="label">Environment</span>
-              <span className="value">{health.environment}</span>
-            </div>
-            <div className="status-list-item">
-              <span className="label">Default provider</span>
-              <span className="value">{health.default_provider}</span>
-            </div>
+            {index < PIPELINE_STEPS.length - 1 && (
+              <span className="pipeline-arrow" aria-hidden="true">
+                →
+              </span>
+            )}
           </div>
-        )}
-
-        {health?.providers?.length > 0 && (
-          <div className="table-wrap">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Provider</th>
-                  <th>Available</th>
-                </tr>
-              </thead>
-              <tbody>
-                {health.providers.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.label}</td>
-                    <td>{item.available ? "yes" : "no"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        ))}
       </section>
 
       {stats && (
+        <div className="stat-grid">
+          <div className="stat-card">
+            <div className="stat-card-label">Total requests</div>
+            <div className="stat-card-value">{stats.total_requests}</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-card-label">Block rate</div>
+            <div className="stat-card-value fail">
+              {(stats.block_rate * 100).toFixed(1)}%
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-card-label">Warn rate</div>
+            <div className="stat-card-value warn">
+              {(stats.warn_rate * 100).toFixed(1)}%
+            </div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-card-label">Avg latency</div>
+            <div className="stat-card-value accent">
+              {stats.avg_latency_ms != null ? `${Math.round(stats.avg_latency_ms)}ms` : "n/a"}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="card-grid">
         <section className="card">
-          <h3>Gateway stats</h3>
-          <StatsSummary stats={stats} />
+          <h3>Backend</h3>
+
+          <div className="status-list">
+            <div className="status-list-item">
+              <span className="label">API URL</span>
+              <span className="value mono">{getApiBaseUrl()}</span>
+            </div>
+          </div>
+
+          {loading && <p className="status-text">Checking backend...</p>}
+
+          {error && (
+            <div className="alert alert-error">
+              <strong>Backend unreachable.</strong> {error}
+              <p className="hint">
+                Local: start the API on port 8000 or 8010. Production uses the Vercel proxy.
+              </p>
+            </div>
+          )}
+
+          {health && (
+            <>
+              <div className="status-list">
+                <div className="status-list-item">
+                  <span className="label">Status</span>
+                  <span className="value">{health.status}</span>
+                </div>
+                <div className="status-list-item">
+                  <span className="label">Environment</span>
+                  <span className="value">{health.environment}</span>
+                </div>
+                <div className="status-list-item">
+                  <span className="label">Default provider</span>
+                  <span className="value">{health.default_provider}</span>
+                </div>
+              </div>
+
+              {health.providers?.length > 0 && (
+                <div className="table-wrap">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Provider</th>
+                        <th>Available</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {health.providers.map((item) => (
+                        <tr key={item.id}>
+                          <td>{item.label}</td>
+                          <td>{item.available ? "yes" : "no"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
+          )}
+        </section>
+
+        <section className="ml-card">
+          <div className="ml-card-header">
+            <span className="ml-card-title">ML Classifier</span>
+            {mlHealth && <span className={`ml-badge ${mlBadgeClass()}`}>{mlBadgeLabel()}</span>}
+          </div>
+
+          {!mlHealth && <p className="status-text">Loading ML status...</p>}
+
+          {mlHealth && (
+            <div className="ml-details">
+              <div className="ml-detail">
+                <div className="ml-detail-label">Backend</div>
+                <div className="ml-detail-value">{mlHealth.backend}</div>
+              </div>
+              <div className="ml-detail">
+                <div className="ml-detail-label">Block threshold</div>
+                <div className="ml-detail-value">{mlHealth.block_threshold}</div>
+              </div>
+              <div className="ml-detail">
+                <div className="ml-detail-label">Model</div>
+                <div className="ml-detail-value mono">{mlHealth.model}</div>
+              </div>
+              <div className="ml-detail">
+                <div className="ml-detail-label">Warn threshold</div>
+                <div className="ml-detail-value">{mlHealth.warn_threshold}</div>
+              </div>
+            </div>
+          )}
+        </section>
+      </div>
+
+      {stats && (
+        <section className="card">
+          <h3>Decision breakdown</h3>
+          <StatsSummary stats={stats} compact showProviders />
         </section>
       )}
 
@@ -143,13 +224,13 @@ export default function Dashboard({ onOpenLogs }) {
               className="btn btn-secondary btn-sm-inline"
               onClick={() => onOpenLogs()}
             >
-              Open logs
+              View all logs
             </button>
           )}
         </div>
 
         {recentLogs.length === 0 && (
-          <p className="status-text">No requests yet. Send a prompt from the Chat tab.</p>
+          <p className="status-text">No requests yet. Send a prompt from Chat.</p>
         )}
 
         {recentLogs.length > 0 && (

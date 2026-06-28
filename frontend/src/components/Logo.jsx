@@ -11,17 +11,17 @@ export default function Logo({ size = 36, className = "" }) {
     >
       <defs>
         <linearGradient id="shield-grad" x1="8" y1="6" x2="32" y2="34" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#22d3ee" />
-          <stop offset="1" stopColor="#818cf8" />
+          <stop stopColor="#34d399" />
+          <stop offset="1" stopColor="#059669" />
         </linearGradient>
         <linearGradient id="shield-shine" x1="10" y1="8" x2="30" y2="30" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#ffffff" stopOpacity="0.2" />
+          <stop stopColor="#ffffff" stopOpacity="0.18" />
           <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
         </linearGradient>
       </defs>
       <path
         d="M20 4L34 10V19C34 27.5 28 33.5 20 36C12 33.5 6 27.5 6 19V10L20 4Z"
-        fill="#111116"
+        fill="#0f1419"
         stroke="url(#shield-grad)"
         strokeWidth="1.5"
       />
@@ -36,7 +36,7 @@ export default function Logo({ size = 36, className = "" }) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="20" cy="14" r="2" fill="#22d3ee" opacity="0.7" />
+      <circle cx="20" cy="14" r="2" fill="#34d399" opacity="0.8" />
     </svg>
   );
 }
