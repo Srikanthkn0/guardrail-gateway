@@ -2,11 +2,41 @@ import DecisionBadge from "./DecisionBadge.jsx";
 import ScanPanel from "./ScanPanel.jsx";
 
 const STEPS = [
-  { key: "input", label: "Input scan", icon: "↓" },
-  { key: "llm", label: "LLM call", icon: "▸" },
-  { key: "output", label: "Output scan", icon: "↑" },
-  { key: "final", label: "Final", icon: "✓" },
+  { key: "input", label: "Input scan", icon: "input" },
+  { key: "llm", label: "LLM call", icon: "llm" },
+  { key: "output", label: "Output scan", icon: "output" },
+  { key: "final", label: "Final", icon: "final" },
 ];
+
+function FlowIcon({ name }) {
+  const icons = {
+    input: (
+      <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <path d="M10 4V16" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+        <path d="M6 8L10 4L14 8" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+    llm: (
+      <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <rect x="3" y="5" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M7 9H13M7 12H10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    ),
+    output: (
+      <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <path d="M10 16V4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+        <path d="M6 12L10 16L14 12" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+    final: (
+      <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M7 10L9 12L13 8" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  };
+  return <span className="flow-step-icon">{icons[name]}</span>;
+}
 
 function stepStatus(stepKey, result) {
   if (!result) return "pending";
@@ -47,7 +77,7 @@ export default function GatewayFlow({ result }) {
           return (
             <div key={step.key} style={{ display: "contents" }}>
               <div className={`flow-step ${statusClass(status)}`}>
-                <div className="flow-step-icon">{step.icon}</div>
+                <FlowIcon name={step.icon} />
                 <span className="flow-step-label">{step.label}</span>
                 <span className="flow-step-status">
                   {step.key === "llm" && status === "done" && (
@@ -70,7 +100,9 @@ export default function GatewayFlow({ result }) {
               </div>
               {index < STEPS.length - 1 && (
                 <span className="flow-arrow" aria-hidden="true">
-                  →
+                  <svg viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </span>
               )}
             </div>

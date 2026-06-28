@@ -1,6 +1,18 @@
 import { decisionClass } from "../utils/decisions.js";
 
-export default function DecisionBadge({ decision }) {
+const LABELS = {
+  allow: "Passed",
+  block: "Blocked",
+  warn: "Warning",
+};
+
+export default function DecisionBadge({ decision, showDot = true }) {
   if (!decision) return null;
-  return <span className={`badge ${decisionClass(decision)}`}>{decision}</span>;
+  const label = LABELS[decision] ?? decision;
+  return (
+    <span className={`badge ${decisionClass(decision)}`}>
+      {showDot && <span className="badge-dot" aria-hidden="true" />}
+      {label}
+    </span>
+  );
 }

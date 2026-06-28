@@ -5,7 +5,7 @@ import Chat from "./pages/Chat.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Logs from "./pages/Logs.jsx";
 import Rules from "./pages/Rules.jsx";
-import { fetchLiveness } from "./api.js";
+import { fetchLiveness, fetchRules } from "./api.js";
 
 const NAV_ITEMS = [
   {
@@ -18,7 +18,7 @@ const NAV_ITEMS = [
     id: "rules",
     label: "Rules",
     icon: "rules",
-    description: "Test prompt and output guardrails in isolation",
+    description: "Test input & output guardrails — 900+ patterns",
   },
   {
     id: "chat",
@@ -35,11 +35,13 @@ const NAV_ITEMS = [
 ];
 
 const GITHUB_URL = "https://github.com/Srikanthkn0/guardrail-gateway";
+const LIVE_URL = "https://guardrail-gateway.vercel.app";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [logsFocusId, setLogsFocusId] = useState(null);
   const [apiOnline, setApiOnline] = useState(null);
+  const [ruleCount, setRuleCount] = useState(null);
 
   function openLogs(requestId = null) {
     setLogsFocusId(requestId);
@@ -66,13 +68,21 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    fetchRules()
+      .then((data) => setRuleCount(data.count))
+      .catch(() => setRuleCount(null));
+  }, []);
+
   const activeItem = NAV_ITEMS.find((item) => item.id === activeTab) ?? NAV_ITEMS[0];
+  const isWidePage = activeTab === "chat" || activeTab === "logs";
 
   return (
     <div className="app-shell">
       <aside className="sidebar">
         <div className="sidebar-brand">
-          <Logo size={40} showWordmark />
+          <Logo size={42} showWordmark />
+          <p className="sidebar-tagline">LLM safety gateway</p>
         </div>
 
         <nav className="sidebar-nav" aria-label="Main">
@@ -84,10 +94,28 @@ export default function App() {
               onClick={() => setActiveTab(item.id)}
             >
               <NavIcon name={item.icon} />
-              {item.label}
+              <span className="sidebar-link-text">
+                <span className="sidebar-link-label">{item.label}</span>
+                {activeTab === item.id && (
+                  <span className="sidebar-link-desc">{item.description}</span>
+                )}
+              </span>
             </button>
           ))}
         </nav>
+
+        <div className="sidebar-meta">
+          {ruleCount != null && (
+            <div className="sidebar-stat">
+              <span className="sidebar-stat-value">{ruleCount.toLocaleString()}</span>
+              <span className="sidebar-stat-label">guardrail rules</span>
+            </div>
+          )}
+          <div className="sidebar-stat">
+            <span className="sidebar-stat-value">In + Out</span>
+            <span className="sidebar-stat-label">dual scanning</span>
+          </div>
+        </div>
 
         <div className="sidebar-footer">
           <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="sidebar-github">
@@ -95,7 +123,9 @@ export default function App() {
             Source
             <NavIcon name="external" className="nav-icon-external" />
           </a>
-          <span className="sidebar-version">v1.0</span>
+          <a href={LIVE_URL} className="sidebar-version" title="Production URL">
+            guardrail-gateway.vercel.app
+          </a>
         </div>
       </aside>
 
@@ -103,6 +133,7 @@ export default function App() {
         <header className="topbar">
           <div className="topbar-title">
             <div className="topbar-heading">
+              <p className="topbar-eyebrow">Guardrail Gateway</p>
               <h1>{activeItem.label}</h1>
               <p className="topbar-subtitle">{activeItem.description}</p>
             </div>
@@ -115,6 +146,9 @@ export default function App() {
                 {apiOnline === true && "API online"}
                 {apiOnline === false && "API unreachable"}
               </span>
+              {ruleCount != null && (
+                <span className="topbar-pill">{ruleCount.toLocaleString()} rules active</span>
+              )}
               {activeTab !== "chat" && (
                 <button
                   type="button"
@@ -128,11 +162,11 @@ export default function App() {
           </div>
         </header>
 
-        <main className="main-content">
+        <main className={`main-content page-enter ${isWidePage ? "main-content-wide" : ""}`}>
           {activeTab === "dashboard" && (
-            <Dashboard onOpenLogs={openLogs} onOpenChat={() => setActiveTab("chat")} />
+            <Dashboard onOpenLogs={openLogs} onOpenChat={() => setActiveTab("chat")} ruleCount={ruleCount} />
           )}
-          {activeTab === "rules" && <Rules />}
+          {activeTab === "rules" && <Rules ruleCount={ruleCount} />}
           {activeTab === "chat" && <Chat onViewLog={openLogs} />}
           {activeTab === "logs" && (
             <Logs

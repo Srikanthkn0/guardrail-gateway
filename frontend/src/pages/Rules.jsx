@@ -32,7 +32,7 @@ const SAMPLE_OUTPUTS = [
   { label: "Warn - PII", text: "Patient SSN on file: 123-45-6789", variant: "chip-warn" },
 ];
 
-export default function Rules() {
+export default function Rules({ ruleCount }) {
   const [rules, setRules] = useState([]);
   const [text, setText] = useState(SAMPLE_PROMPTS[0].text);
   const [outputText, setOutputText] = useState("");
@@ -87,14 +87,34 @@ export default function Rules() {
     }
   }
 
-  return (
-    <div className="stack">
-      <header className="page-header">
-        <p>Test input and output scanning. Combined decision uses block &gt; warn &gt; allow.</p>
-      </header>
+  const inputRuleCount = rules.filter((r) => r.scope === "input").length;
+  const outputRuleCount = rules.filter((r) => r.scope === "output").length;
 
-      <section className="card">
-        <h3>Test scan</h3>
+  return (
+    <div className="stack rules-page">
+      <div className="rules-summary">
+        <div className="rules-summary-card">
+          <span className="rules-summary-value">{ruleCount ?? rules.length}</span>
+          <span className="rules-summary-label">Total rules</span>
+        </div>
+        <div className="rules-summary-card">
+          <span className="rules-summary-value">{inputRuleCount}</span>
+          <span className="rules-summary-label">Input scan</span>
+        </div>
+        <div className="rules-summary-card">
+          <span className="rules-summary-value">{outputRuleCount}</span>
+          <span className="rules-summary-label">Output scan</span>
+        </div>
+        <p className="rules-summary-hint">
+          Combined decision: <strong>block</strong> &gt; <strong>warn</strong> &gt; <strong>passed</strong>
+        </p>
+      </div>
+
+      <section className="card card-elevated">
+        <div className="card-heading">
+          <h3>Test scan</h3>
+          <span className="card-heading-hint">Run input and optional output text through the engine</span>
+        </div>
         <form className="form" onSubmit={handleTest}>
           <label className="field">
             <span>Input text</span>
@@ -166,32 +186,47 @@ export default function Rules() {
         )}
       </section>
 
-      <section className="card">
+      <section className="card card-elevated">
         <div className="toolbar">
-          <h3>
-            Active rules ({filteredRules.length}
-            {filteredRules.length !== rules.length ? ` / ${rules.length}` : ""})
-          </h3>
+          <div className="card-heading">
+            <h3>
+              Rule catalog ({filteredRules.length}
+              {filteredRules.length !== rules.length ? ` / ${rules.length}` : ""})
+            </h3>
+          </div>
           <div className="filter-row">
-            <label className="field field-inline">
-              <span>Scope</span>
-              <select value={scopeFilter} onChange={(e) => setScopeFilter(e.target.value)}>
-                <option value="">All</option>
-                <option value="input">input</option>
-                <option value="output">output</option>
-              </select>
-            </label>
-            <label className="field field-inline">
-              <span>Severity</span>
-              <select
-                value={severityFilter}
-                onChange={(e) => setSeverityFilter(e.target.value)}
-              >
-                <option value="">All</option>
-                <option value="block">block</option>
-                <option value="warn">warn</option>
-              </select>
-            </label>
+            <div className="pill-group" role="group" aria-label="Scope filter">
+              {[
+                { value: "", label: "All" },
+                { value: "input", label: "Input" },
+                { value: "output", label: "Output" },
+              ].map((opt) => (
+                <button
+                  key={opt.value || "all"}
+                  type="button"
+                  className={`pill ${scopeFilter === opt.value ? "pill-active" : ""}`}
+                  onClick={() => setScopeFilter(opt.value)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <div className="pill-group" role="group" aria-label="Severity filter">
+              {[
+                { value: "", label: "All" },
+                { value: "block", label: "Block" },
+                { value: "warn", label: "Warn" },
+              ].map((opt) => (
+                <button
+                  key={opt.value || "all-sev"}
+                  type="button"
+                  className={`pill ${severityFilter === opt.value ? "pill-active" : ""}`}
+                  onClick={() => setSeverityFilter(opt.value)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
             <label className="field field-inline">
               <span>Search</span>
               <input

@@ -168,10 +168,27 @@ export default function Chat({ onViewLog }) {
           <div className="chat-thread">
             {messages.length === 0 && !sending && (
               <div className="chat-empty">
-                <p>Send a message to test the gateway.</p>
+                <div className="chat-empty-icon" aria-hidden="true">
+                  <svg viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="1.25" opacity="0.35" />
+                    <path
+                      d="M24 10L34 14.5V21C34 26.8 29.8 31.2 24 33C18.2 31.2 14 26.8 14 21V14.5L24 10Z"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                    />
+                    <path
+                      d="M19 22H22V25H26V22H29"
+                      stroke="currentColor"
+                      strokeWidth="1.75"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+                <p className="chat-empty-title">Gateway ready</p>
                 <p className="status-text">
-                  Try a normal question, or use the sample chips to test injection detection and
-                  output redaction.
+                  Every message is scanned on input and output. Try a normal question or use sample
+                  chips to test blocks and redaction.
                 </p>
               </div>
             )}

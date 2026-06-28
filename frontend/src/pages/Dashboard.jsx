@@ -82,7 +82,7 @@ function PipelineIcon({ name }) {
   return <span className="pipeline-icon">{icons[name]}</span>;
 }
 
-export default function Dashboard({ onOpenLogs, onOpenChat }) {
+export default function Dashboard({ onOpenLogs, onOpenChat, ruleCount }) {
   const [health, setHealth] = useState(null);
   const [mlHealth, setMlHealth] = useState(null);
   const [stats, setStats] = useState(null);
@@ -171,6 +171,12 @@ export default function Dashboard({ onOpenLogs, onOpenChat }) {
           </div>
         </div>
         <div className="hero-metrics">
+          <div className="hero-metric hero-metric-highlight">
+            <span className="hero-metric-value accent">
+              {ruleCount != null ? ruleCount.toLocaleString() : "—"}
+            </span>
+            <span className="hero-metric-label">Guardrail rules</span>
+          </div>
           <div className="hero-metric">
             <span className="hero-metric-value">{availableProviders || "—"}</span>
             <span className="hero-metric-label">Providers live</span>
