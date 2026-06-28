@@ -4,6 +4,10 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/health/:path*",
+      "destination": "https://guardrail-gateway-api.onrender.com/health/:path*"
+    },
+    {
       "source": "/health",
       "destination": "https://guardrail-gateway-api.onrender.com/health"
     },
