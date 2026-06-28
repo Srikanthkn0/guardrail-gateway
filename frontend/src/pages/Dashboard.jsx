@@ -4,7 +4,85 @@ import DecisionBadge from "../components/DecisionBadge.jsx";
 import { fetchHealth, fetchLogs, fetchMlHealth, fetchStats, getApiBaseUrl } from "../api.js";
 import { formatTime } from "../utils/format.js";
 
-export default function Dashboard({ onOpenLogs, ruleCount }) {
+const PIPELINE_STEPS = [
+  { key: "input", label: "Input", desc: "User prompt" },
+  { key: "scan", label: "Rules + ML", desc: "Hybrid scan", active: true },
+  { key: "provider", label: "Provider", desc: "LLM call" },
+  { key: "output", label: "Output", desc: "Response scan" },
+  { key: "log", label: "Log", desc: "SQLite store" },
+];
+
+const FEATURES = [
+  {
+    title: "Hybrid guard engine",
+    desc: "Deterministic rules layered with ML cascade — Grok judge, sklearn, and HuggingFace fallback.",
+    tag: "Core",
+  },
+  {
+    title: "Multi-provider proxy",
+    desc: "Routes through Grok, Gemini, and OpenAI with automatic failover and mock mode for testing.",
+    tag: "LLM",
+  },
+  {
+    title: "Production hardening",
+    desc: "API key auth, rate limiting, security headers, structured logging, and health probes.",
+    tag: "Ops",
+  },
+];
+
+const TECH_STACK = [
+  "FastAPI",
+  "React",
+  "SQLite",
+  "scikit-learn",
+  "Grok",
+  "Gemini",
+  "Vercel",
+  "Render",
+];
+
+function PipelineIcon({ name }) {
+  const icons = {
+    input: (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 5V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <path d="M7 10L12 5L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+    scan: (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+          d="M12 4L19 7.5V13C19 17.2 15.8 20.2 12 21.5C8.2 20.2 5 17.2 5 13V7.5L12 4Z"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinejoin="round"
+        />
+        <path d="M9.5 12L11 13.5L14.5 10" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+    provider: (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="4" y="6" width="16" height="12" rx="2" stroke="currentColor" strokeWidth="1.75" />
+        <path d="M9 10H15M9 14H12" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+      </svg>
+    ),
+    output: (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 19V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <path d="M7 14L12 19L17 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+    log: (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M7 8H17M7 12H17M7 16H13" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+        <rect x="5" y="5" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.75" />
+      </svg>
+    ),
+  };
+  return <span className="pipeline-icon">{icons[name]}</span>;
+}
+
+export default function Dashboard({ onOpenLogs, onOpenChat, ruleCount }) {
   const [health, setHealth] = useState(null);
   const [mlHealth, setMlHealth] = useState(null);
   const [stats, setStats] = useState(null);
@@ -60,15 +138,104 @@ export default function Dashboard({ onOpenLogs, ruleCount }) {
     return "not loaded";
   }
 
+  const availableProviders = health?.providers?.filter((p) => p.available).length ?? 0;
+
   return (
     <div className="stack">
-      <header className="page-header">
-        <h2>Overview</h2>
-        <p>
-          Gateway health, scanner status, and recent requests.
-          {ruleCount != null ? ` ${ruleCount.toLocaleString()} rules loaded.` : ""}
-        </p>
-      </header>
+      <section className="hero" aria-label="Project overview">
+        <div className="hero-content">
+          <p className="hero-eyebrow">Open-source LLM safety gateway</p>
+          <h2 className="hero-title">
+            Inspect every prompt.
+            <br />
+            <span className="hero-title-accent">Enforce every decision.</span>
+          </h2>
+          <p className="hero-desc">
+            A production-ready proxy that scans inputs and outputs with hybrid rules + ML,
+            routes to real LLM providers, and logs every request for audit and debugging.
+          </p>
+          <div className="hero-actions">
+            {onOpenChat && (
+              <button type="button" className="btn btn-primary" onClick={onOpenChat}>
+                Open live chat
+              </button>
+            )}
+            <a
+              href="https://github.com/Srikanthkn0/guardrail-gateway"
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-secondary"
+            >
+              View on GitHub
+            </a>
+          </div>
+        </div>
+        <div className="hero-metrics">
+          <div className="hero-metric hero-metric-highlight">
+            <span className="hero-metric-value accent">
+              {ruleCount != null ? ruleCount.toLocaleString() : "—"}
+            </span>
+            <span className="hero-metric-label">Guardrail rules</span>
+          </div>
+          <div className="hero-metric">
+            <span className="hero-metric-value">{availableProviders || "—"}</span>
+            <span className="hero-metric-label">Providers live</span>
+          </div>
+          <div className="hero-metric">
+            <span className="hero-metric-value">{stats?.total_requests ?? "—"}</span>
+            <span className="hero-metric-label">Requests logged</span>
+          </div>
+          <div className="hero-metric">
+            <span className={`hero-metric-value ${mlHealth?.loaded ? "accent" : ""}`}>
+              {mlHealth?.loaded ? "Active" : mlHealth ? "Idle" : "—"}
+            </span>
+            <span className="hero-metric-label">ML scanner</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="feature-grid" aria-label="Capabilities">
+        {FEATURES.map((feature) => (
+          <article key={feature.title} className="feature-card">
+            <span className="feature-tag">{feature.tag}</span>
+            <h3>{feature.title}</h3>
+            <p>{feature.desc}</p>
+          </article>
+        ))}
+      </section>
+
+      <div className="tech-stack" aria-label="Tech stack">
+        {TECH_STACK.map((item) => (
+          <span key={item} className="tech-pill">
+            {item}
+          </span>
+        ))}
+      </div>
+
+      <section className="pipeline" aria-label="Gateway pipeline">
+        <div className="pipeline-header">
+          <h3>Request pipeline</h3>
+          <span className="pipeline-hint">Every message flows through five stages</span>
+        </div>
+        <div className="pipeline-track">
+          {PIPELINE_STEPS.map((step, index) => (
+            <div key={step.label} style={{ display: "contents" }}>
+              <div className={`pipeline-step ${step.active ? "pipeline-step-active" : ""}`}>
+                <PipelineIcon name={step.key} />
+                <span className="pipeline-label">{step.label}</span>
+                <span className="pipeline-desc">{step.desc}</span>
+              </div>
+              {index < PIPELINE_STEPS.length - 1 && (
+                <span className="pipeline-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
 
       {stats && (
         <div className="stat-grid">
@@ -90,7 +257,7 @@ export default function Dashboard({ onOpenLogs, ruleCount }) {
           </div>
           <div className="stat-card">
             <div className="stat-card-label">Avg latency</div>
-            <div className="stat-card-value">
+            <div className="stat-card-value accent">
               {stats.avg_latency_ms != null ? `${Math.round(stats.avg_latency_ms)}ms` : "n/a"}
             </div>
           </div>
@@ -114,13 +281,7 @@ export default function Dashboard({ onOpenLogs, ruleCount }) {
             <div className="alert alert-error">
               <strong>Backend unreachable.</strong> {error}
               <p className="hint">
-                Local: <code>cd backend && PORT=8010 ./run.sh</code>. Production:
-                {" "}
-                <a href="https://guardrail-gateway-api.onrender.com/health" target="_blank" rel="noreferrer">
-                  guardrail-gateway-api.onrender.com
-                </a>
-                {" "}
-                (restart in Render if you see 502).
+                Local: start the API on port 8000 or 8010. Production uses the Vercel proxy.
               </p>
             </div>
           )}
@@ -172,7 +333,7 @@ export default function Dashboard({ onOpenLogs, ruleCount }) {
 
         <section className="ml-card">
           <div className="ml-card-header">
-            <span className="ml-card-title">Prompt scanner</span>
+            <span className="ml-card-title">Prompt Scanner</span>
             {mlHealth && <span className={`ml-badge ${mlBadgeClass()}`}>{mlBadgeLabel()}</span>}
           </div>
 

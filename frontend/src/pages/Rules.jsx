@@ -105,10 +105,16 @@ export default function Rules({ ruleCount }) {
           <span className="rules-summary-value">{outputRuleCount}</span>
           <span className="rules-summary-label">Output scan</span>
         </div>
+        <p className="rules-summary-hint">
+          Combined decision: <strong>block</strong> &gt; <strong>warn</strong> &gt; <strong>passed</strong>
+        </p>
       </div>
 
-      <section className="card">
-        <h3>Test scan</h3>
+      <section className="card card-elevated">
+        <div className="card-heading">
+          <h3>Test scan</h3>
+          <span className="card-heading-hint">Run input and optional output text through the engine</span>
+        </div>
         <form className="form" onSubmit={handleTest}>
           <label className="field">
             <span>Input text</span>
@@ -180,12 +186,14 @@ export default function Rules({ ruleCount }) {
         )}
       </section>
 
-      <section className="card">
+      <section className="card card-elevated">
         <div className="toolbar">
-          <h3>
-            Rule catalog ({filteredRules.length}
-            {filteredRules.length !== rules.length ? ` / ${rules.length}` : ""})
-          </h3>
+          <div className="card-heading">
+            <h3>
+              Rule catalog ({filteredRules.length}
+              {filteredRules.length !== rules.length ? ` / ${rules.length}` : ""})
+            </h3>
+          </div>
           <div className="filter-row">
             <div className="pill-group" role="group" aria-label="Scope filter">
               {[

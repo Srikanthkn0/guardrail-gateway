@@ -26,8 +26,8 @@ export default function ScanPanel({ title, scan }) {
             <span>
               {scan.ml_backend === "grok" ? "Grok scan score" : "ML injection score"}
               {scan.ml_loaded
-                ? ` | ${scan.ml_label} (${scan.ml_backend}${scan.ml_model ? ` / ${scan.ml_model}` : ""})`
-                : " | model not loaded"}
+                ? ` · ${scan.ml_label} (${scan.ml_backend}${scan.ml_model ? ` / ${scan.ml_model}` : ""})`
+                : " · model not loaded"}
             </span>
             {scan.ml_loaded && <span>{mlPercent}%</span>}
           </div>

@@ -141,7 +141,7 @@ export default function Logs({ focusRequestId, onFocusHandled }) {
           </div>
           <div className="logs-stat-card">
             <span className="logs-stat-value">
-              {stats.avg_latency_ms != null ? `${Math.round(stats.avg_latency_ms)}ms` : "n/a"}
+              {stats.avg_latency_ms != null ? `${Math.round(stats.avg_latency_ms)}ms` : "—"}
             </span>
             <span className="logs-stat-label">Avg latency</span>
           </div>
@@ -191,7 +191,7 @@ export default function Logs({ focusRequestId, onFocusHandled }) {
             </label>
           </div>
 
-          {loading && <p className="status-text">Loading logs...</p>}
+          {loading && <p className="status-text">Loading logs…</p>}
 
           {error && (
             <div className="alert alert-error">
@@ -200,7 +200,18 @@ export default function Logs({ focusRequestId, onFocusHandled }) {
           )}
 
           {!loading && logs.length === 0 && (
-            <p className="status-text">No requests yet. Send a message from Chat.</p>
+            <div className="logs-empty">
+              <div className="logs-empty-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" fill="none">
+                  <rect x="8" y="10" width="32" height="28" rx="3" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M14 18H34M14 24H28M14 30H22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </div>
+              <p className="logs-empty-title">No requests yet</p>
+              <p className="status-text">
+                Send a message from Chat to populate the audit trail.
+              </p>
+            </div>
           )}
 
           {!loading && logs.length > 0 && (
@@ -251,7 +262,7 @@ export default function Logs({ focusRequestId, onFocusHandled }) {
                 Previous
               </button>
               <span className="status-text">
-                Page {page} of {totalPages} | {offset + 1}-{Math.min(offset + PAGE_SIZE, total)} of {total}
+                Page {page} of {totalPages} · {offset + 1}–{Math.min(offset + PAGE_SIZE, total)} of {total}
               </span>
               <button
                 type="button"
@@ -269,7 +280,7 @@ export default function Logs({ focusRequestId, onFocusHandled }) {
           <div className="toolbar">
             <h3>Request detail</h3>
             {selectedId && (
-              <span className="mono logs-detail-id">{selectedId.slice(0, 8)}...</span>
+              <span className="mono logs-detail-id">{selectedId.slice(0, 8)}…</span>
             )}
           </div>
 
@@ -281,7 +292,7 @@ export default function Logs({ focusRequestId, onFocusHandled }) {
             </div>
           )}
 
-          {loadingDetail && <p className="status-text">Loading detail...</p>}
+          {loadingDetail && <p className="status-text">Loading detail…</p>}
 
           {detail && (
             <div className="logs-detail-content">
@@ -294,13 +305,13 @@ export default function Logs({ focusRequestId, onFocusHandled }) {
                 <div className="status-list-item">
                   <span className="label">Input</span>
                   <span className="value">
-                    <DecisionBadge decision={detail.input_decision} />
+                    <DecisionBadge decision={detail.input_decision} showDot={false} />
                   </span>
                 </div>
                 <div className="status-list-item">
                   <span className="label">Output</span>
                   <span className="value">
-                    <DecisionBadge decision={detail.output_decision || "allow"} />
+                    <DecisionBadge decision={detail.output_decision || "allow"} showDot={false} />
                   </span>
                 </div>
                 <div className="status-list-item">

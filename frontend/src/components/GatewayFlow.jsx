@@ -83,7 +83,7 @@ export default function GatewayFlow({ result }) {
                   {step.key === "llm" && status === "done" && (
                     <>
                       {result.provider}/{result.model}
-                      {result.latency_ms != null && ` | ${Math.round(result.latency_ms)}ms`}
+                      {result.latency_ms != null && ` · ${Math.round(result.latency_ms)}ms`}
                     </>
                   )}
                   {step.key === "llm" && status === "skipped" && "not called"}
@@ -118,7 +118,7 @@ export default function GatewayFlow({ result }) {
             <div className="llm-call-header">
               <span>LLM response</span>
               <span className="mono">
-                {result.provider} | {result.model}
+                {result.provider} · {result.model}
               </span>
             </div>
             {result.response_text ? (
