@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from app.config import DATA_DIR
+from app.config import DATA_DIR, settings
 from app.models import (
     ChatResponse,
     GatewayLogEntry,
@@ -127,7 +127,7 @@ def record_gateway_request(prompt: str, response: ChatResponse) -> None:
             (
                 response.request_id,
                 created_at,
-                prompt,
+                prompt if settings.store_full_log_content else _prompt_preview(prompt),
                 response.provider,
                 response.model,
                 response.input_scan.decision,
@@ -136,7 +136,7 @@ def record_gateway_request(prompt: str, response: ChatResponse) -> None:
                 int(response.forwarded),
                 response.latency_ms,
                 response_redacted,
-                response.response_text,
+                response.response_text if settings.store_full_log_content else None,
                 json.dumps(input_hits),
                 json.dumps(output_hits),
                 json.dumps(response.reasons),

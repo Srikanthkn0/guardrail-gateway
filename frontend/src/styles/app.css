@@ -216,6 +216,11 @@ body {
   box-shadow: 0 0 8px var(--accent-glow);
 }
 
+.status-dot-offline {
+  background: var(--fail);
+  box-shadow: 0 0 8px rgba(248, 113, 113, 0.35);
+}
+
 .main-content {
   flex: 1;
   padding: 20px 28px 40px;

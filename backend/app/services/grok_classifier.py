@@ -46,6 +46,12 @@ def _extract_json(text: str) -> dict:
     return json.loads(cleaned[start : end + 1])
 
 
+async def classify_prompt_async(text: str) -> tuple[float, str, str | None]:
+    import asyncio
+
+    return await asyncio.to_thread(classify_prompt, text)
+
+
 def classify_prompt(text: str) -> tuple[float, str, str | None]:
     """
     Call Grok to classify a prompt.

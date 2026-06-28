@@ -7,6 +7,9 @@ os.environ["OPENAI_API_KEY"] = ""
 os.environ["XAI_API_KEY"] = ""
 os.environ["GROK_API_KEY"] = ""
 os.environ["DEFAULT_PROVIDER"] = "mock"
+os.environ["API_KEY"] = ""
+os.environ["REQUIRE_API_KEY"] = "false"
+os.environ["APP_ENV"] = "development"
 
 import pytest
 

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Logo from "./components/Logo.jsx";
 import Chat from "./pages/Chat.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Logs from "./pages/Logs.jsx";
 import Rules from "./pages/Rules.jsx";
+import { fetchLiveness } from "./api.js";
 
 const NAV_ITEMS = [
   { id: "dashboard", label: "Overview", icon: "◉" },
@@ -17,11 +18,32 @@ const GITHUB_URL = "https://github.com/Srikanthkn0/guardrail-gateway";
 export default function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [logsFocusId, setLogsFocusId] = useState(null);
+  const [apiOnline, setApiOnline] = useState(null);
 
   function openLogs(requestId = null) {
     setLogsFocusId(requestId);
     setActiveTab("logs");
   }
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function check() {
+      try {
+        await fetchLiveness();
+        if (!cancelled) setApiOnline(true);
+      } catch {
+        if (!cancelled) setApiOnline(false);
+      }
+    }
+
+    check();
+    const interval = setInterval(check, 30_000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
 
   const activeLabel = NAV_ITEMS.find((item) => item.id === activeTab)?.label ?? "";
 
@@ -65,8 +87,12 @@ export default function App() {
           <div className="topbar-title">
             <h1>{activeLabel}</h1>
             <span className="topbar-status">
-              <span className="status-dot" />
-              Gateway active
+              <span
+                className={`status-dot ${apiOnline === false ? "status-dot-offline" : ""}`}
+              />
+              {apiOnline === null && "Checking API…"}
+              {apiOnline === true && "API online"}
+              {apiOnline === false && "API unreachable"}
             </span>
           </div>
         </header>

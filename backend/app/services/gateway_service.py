@@ -1,11 +1,27 @@
 import uuid
 
+from fastapi import HTTPException
+
+from app.config import settings
 from app.models import ChatResponse
 from app.providers.router import complete, resolve_provider_name
 from app.services.decision_engine import combine_decisions, merge_reasons
 from app.services.input_scanner import scan_input
 from app.services.output_scanner import scan_output
 from app.storage.log_store import record_gateway_request
+
+
+async def _call_provider(provider_name: str, prompt: str, model: str | None):
+    try:
+        return await complete(provider_name, prompt, model=model)
+    except HTTPException as exc:
+        if (
+            provider_name == "grok"
+            and settings.OPENAI_API_KEY.strip()
+            and exc.status_code == 502
+        ):
+            return await complete("openai", prompt, model=None)
+        raise
 
 
 async def handle_chat(
@@ -31,7 +47,7 @@ async def handle_chat(
         return response
 
     provider_name = resolve_provider_name(provider)
-    completion = await complete(provider_name, prompt, model=model)
+    completion = await _call_provider(provider_name, prompt, model=model)
     output_scan = scan_output(completion.text)
     final_decision = combine_decisions(input_scan.decision, output_scan.decision)
     reasons = merge_reasons(input_scan.reasons, output_scan.reasons)

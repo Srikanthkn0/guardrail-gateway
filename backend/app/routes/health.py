@@ -5,9 +5,29 @@ from app.models import HealthResponse, ProviderStatus
 from app.providers.registry import effective_default_provider
 from app.providers.router import list_available_providers
 from app.services.grok_classifier import is_grok_configured
-from app.services.ml_classifier import classifier_status
+from app.services.ml_classifier import classifier_status, ensure_sklearn_loaded
+from app.storage.log_store import DB_PATH
 
 router = APIRouter()
+
+
+@router.get("/health/live")
+async def liveness():
+    return {"status": "ok"}
+
+
+@router.get("/health/ready")
+async def readiness():
+    checks = {
+        "database": DB_PATH.parent.exists(),
+        "sklearn_fallback": ensure_sklearn_loaded(),
+        "grok_api": is_grok_configured(),
+    }
+    ready = checks["database"]
+    return {
+        "status": "ready" if ready else "degraded",
+        "checks": checks,
+    }
 
 
 @router.get("/health", response_model=HealthResponse)

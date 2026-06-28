@@ -28,6 +28,20 @@ class Settings:
     XAI_API_KEY: str = os.getenv("XAI_API_KEY", "") or os.getenv("GROK_API_KEY", "")
     DEFAULT_PROVIDER: str = os.getenv("DEFAULT_PROVIDER", "auto")
     LLM_TIMEOUT_SEC: float = float(os.getenv("LLM_TIMEOUT_SEC", "60"))
+    API_KEY: str = os.getenv("API_KEY", "")
+    REQUIRE_API_KEY: bool = os.getenv("REQUIRE_API_KEY", "").lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+    RATE_LIMIT_PER_MIN: int = int(os.getenv("RATE_LIMIT_PER_MIN", "120"))
+    RATE_LIMIT_CHAT_PER_MIN: int = int(os.getenv("RATE_LIMIT_CHAT_PER_MIN", "30"))
+    RATE_LIMIT_SCAN_PER_MIN: int = int(os.getenv("RATE_LIMIT_SCAN_PER_MIN", "60"))
+    STORE_FULL_LOG_CONTENT: bool = os.getenv("STORE_FULL_LOG_CONTENT", "").lower() in {
+        "1",
+        "true",
+        "yes",
+    }
     ML_GUARD_ENABLED: bool = os.getenv("ML_GUARD_ENABLED", "true").lower() in {
         "1",
         "true",
@@ -60,6 +74,18 @@ class Settings:
     @property
     def is_production(self) -> bool:
         return self.APP_ENV.lower() == "production"
+
+    @property
+    def require_api_key(self) -> bool:
+        if self.REQUIRE_API_KEY:
+            return True
+        return self.is_production and bool(self.API_KEY)
+
+    @property
+    def store_full_log_content(self) -> bool:
+        if self.STORE_FULL_LOG_CONTENT:
+            return True
+        return not self.is_production
 
 
 settings = Settings()

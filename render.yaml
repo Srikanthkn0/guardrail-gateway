@@ -1,5 +1,6 @@
-# Render Blueprint — backend API (free tier)
-# Set XAI_API_KEY or GROK_API_KEY for Grok chat + prompt scanning (not GROQ_API_KEY).
+# Render Blueprint — backend API
+# Set XAI_API_KEY or GROK_API_KEY for Grok chat + prompt scanning.
+# Set API_KEY and the same value as VITE_GATEWAY_API_KEY on Vercel for auth.
 
 services:
   - type: web
@@ -7,6 +8,7 @@ services:
     runtime: python
     plan: free
     rootDir: backend
+    healthCheckPath: /health/live
     buildCommand: pip install -r requirements.txt && python scripts/train_sklearn_classifier.py && python scripts/warm_ml_model.py
     startCommand: gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --workers 1 --timeout 120
     envVars:
@@ -24,11 +26,19 @@ services:
         sync: false
       - key: GROK_API_KEY
         sync: false
+      - key: API_KEY
+        sync: false
+      - key: REQUIRE_API_KEY
+        value: "true"
       - key: ML_GUARD_GROK_MODEL
         value: grok-3-mini
       - key: ML_GUARD_ENABLED
         value: "true"
       - key: ML_GUARD_BACKEND
-        value: "auto"
+        value: auto
       - key: ML_GUARD_MODEL
-        value: "fmops/distilbert-prompt-injection"
+        value: fmops/distilbert-prompt-injection
+      - key: RATE_LIMIT_CHAT_PER_MIN
+        value: "30"
+      - key: STORE_FULL_LOG_CONTENT
+        value: "false"

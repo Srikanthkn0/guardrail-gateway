@@ -1,4 +1,4 @@
-"""Prompt-injection classifier — Grok LLM judge (preferred), HF DistilBERT, sklearn fallback."""
+"""Prompt-injection classifier — Grok LLM judge with sklearn/HF fallback cascade."""
 
 from __future__ import annotations
 
@@ -25,8 +25,8 @@ _UNSAFE_LABELS = frozenset(
 
 _pipeline = None
 _sklearn_model = None
-_grok_ready = False
-_load_attempted = False
+_sklearn_load_attempted = False
+_hf_load_attempted = False
 _lock = threading.Lock()
 
 
@@ -39,6 +39,7 @@ class MLPrediction:
     injection_score: float
     label: str
     error: str | None = None
+    fallback_used: bool = False
 
 
 def _is_injection_label(label: str) -> bool:
@@ -77,59 +78,140 @@ def _load_sklearn():
     return joblib.load(path)
 
 
-def _ensure_loaded() -> tuple[str, object | None]:
-    global _pipeline, _sklearn_model, _grok_ready, _load_attempted
-
+def ensure_sklearn_loaded() -> bool:
+    global _sklearn_model, _sklearn_load_attempted
     with _lock:
-        if _load_attempted:
-            if _grok_ready:
-                return "grok", "api"
-            if _pipeline is not None:
-                return "hf", _pipeline
+        if _sklearn_load_attempted:
+            return _sklearn_model is not None
+        _sklearn_load_attempted = True
+        try:
+            _sklearn_model = _load_sklearn()
             if _sklearn_model is not None:
-                return "sklearn", _sklearn_model
-            return "none", None
+                logger.info("Sklearn fallback model loaded from %s", settings.ML_GUARD_SKLEARN_PATH)
+                return True
+        except Exception:
+            logger.exception("Failed to load sklearn fallback model")
+        return False
 
-        _load_attempted = True
+
+def _ensure_hf_loaded() -> object | None:
+    global _pipeline, _hf_load_attempted
+    with _lock:
+        if _hf_load_attempted:
+            return _pipeline
+        _hf_load_attempted = True
         backend = settings.ML_GUARD_BACKEND.lower()
+        if backend not in {"hf", "auto", "transformers"}:
+            return None
+        try:
+            _pipeline = _load_hf_pipeline()
+            logger.info("HF fallback model loaded: %s", settings.ML_GUARD_MODEL)
+            return _pipeline
+        except Exception:
+            logger.exception("Failed to load HF model %s", settings.ML_GUARD_MODEL)
+            return None
 
-        if backend in {"grok", "auto"} and is_grok_configured():
-            _grok_ready = True
-            logger.info("ML guard using Grok classifier: %s", settings.ML_GUARD_GROK_MODEL)
-            return "grok", "api"
 
-        if backend in {"hf", "auto", "transformers"}:
-            try:
-                _pipeline = _load_hf_pipeline()
-                logger.info("ML guard loaded HF model: %s", settings.ML_GUARD_MODEL)
-                return "hf", _pipeline
-            except Exception:
-                logger.exception("Failed to load HF model %s", settings.ML_GUARD_MODEL)
+def _predict_sklearn(text: str) -> MLPrediction | None:
+    if not ensure_sklearn_loaded() or _sklearn_model is None:
+        return None
+    proba = _sklearn_model.predict_proba([text])[0]
+    classes = list(_sklearn_model.classes_)
+    unsafe_idx = classes.index(1) if 1 in classes else 0
+    injection_score = float(proba[unsafe_idx])
+    block_at, _ = _thresholds_for_backend("sklearn")
+    label = "injection" if injection_score >= block_at else "benign"
+    return MLPrediction(
+        enabled=True,
+        loaded=True,
+        backend="sklearn",
+        model_name=str(settings.ML_GUARD_SKLEARN_PATH.name),
+        injection_score=injection_score,
+        label=label,
+    )
 
-        if backend in {"sklearn", "auto"}:
-            try:
-                _sklearn_model = _load_sklearn()
-                if _sklearn_model is not None:
-                    logger.info(
-                        "ML guard loaded sklearn model from %s",
-                        settings.ML_GUARD_SKLEARN_PATH,
-                    )
-                    return "sklearn", _sklearn_model
-            except Exception:
-                logger.exception("Failed to load sklearn fallback model")
 
-        return "none", None
+def _predict_hf(text: str) -> MLPrediction | None:
+    model = _ensure_hf_loaded()
+    if model is None:
+        return None
+    raw = model(text)[0]
+    injection_score, label = _score_from_hf_result(raw)
+    return MLPrediction(
+        enabled=True,
+        loaded=True,
+        backend="hf",
+        model_name=settings.ML_GUARD_MODEL,
+        injection_score=injection_score,
+        label=label,
+    )
 
 
 def reload_model() -> bool:
-    global _pipeline, _sklearn_model, _grok_ready, _load_attempted
+    global _pipeline, _sklearn_model, _sklearn_load_attempted, _hf_load_attempted
     with _lock:
         _pipeline = None
         _sklearn_model = None
-        _grok_ready = False
-        _load_attempted = False
-    backend, model = _ensure_loaded()
-    return model is not None
+        _sklearn_load_attempted = False
+        _hf_load_attempted = False
+    return ensure_sklearn_loaded() or _ensure_hf_loaded() is not None or is_grok_configured()
+
+
+def _should_try_grok() -> bool:
+    backend = settings.ML_GUARD_BACKEND.lower()
+    return backend in {"grok", "auto"} and is_grok_configured()
+
+
+def _run_cascade(text: str) -> MLPrediction:
+    if _should_try_grok():
+        try:
+            injection_score, label, error = classify_prompt(text)
+            if error is None:
+                return MLPrediction(
+                    enabled=True,
+                    loaded=True,
+                    backend="grok",
+                    model_name=settings.ML_GUARD_GROK_MODEL,
+                    injection_score=injection_score,
+                    label=label,
+                )
+            logger.warning("Grok classifier failed, falling back: %s", error)
+        except Exception as exc:
+            logger.warning("Grok classifier exception, falling back: %s", exc)
+
+    sklearn_pred = _predict_sklearn(text)
+    if sklearn_pred is not None:
+        return MLPrediction(
+            enabled=sklearn_pred.enabled,
+            loaded=sklearn_pred.loaded,
+            backend=sklearn_pred.backend,
+            model_name=sklearn_pred.model_name,
+            injection_score=sklearn_pred.injection_score,
+            label=sklearn_pred.label,
+            fallback_used=_should_try_grok(),
+        )
+
+    hf_pred = _predict_hf(text)
+    if hf_pred is not None:
+        return MLPrediction(
+            enabled=hf_pred.enabled,
+            loaded=hf_pred.loaded,
+            backend=hf_pred.backend,
+            model_name=hf_pred.model_name,
+            injection_score=hf_pred.injection_score,
+            label=hf_pred.label,
+            fallback_used=True,
+        )
+
+    return MLPrediction(
+        enabled=True,
+        loaded=False,
+        backend="none",
+        model_name="",
+        injection_score=0.0,
+        label="benign",
+        error="No ML backend available",
+    )
 
 
 def predict_injection(text: str) -> MLPrediction:
@@ -154,64 +236,15 @@ def predict_injection(text: str) -> MLPrediction:
             label="benign",
         )
 
-    backend, model = _ensure_loaded()
-    if model is None:
-        return MLPrediction(
-            enabled=True,
-            loaded=False,
-            backend=backend,
-            model_name=settings.ML_GUARD_MODEL,
-            injection_score=0.0,
-            label="benign",
-            error="Model not loaded",
-        )
-
     try:
-        if backend == "grok":
-            injection_score, label, error = classify_prompt(normalized)
-            return MLPrediction(
-                enabled=True,
-                loaded=error is None,
-                backend="grok",
-                model_name=settings.ML_GUARD_GROK_MODEL,
-                injection_score=injection_score,
-                label=label,
-                error=error,
-            )
-
-        if backend == "hf":
-            raw = model(normalized)[0]
-            injection_score, label = _score_from_hf_result(raw)
-            return MLPrediction(
-                enabled=True,
-                loaded=True,
-                backend="hf",
-                model_name=settings.ML_GUARD_MODEL,
-                injection_score=injection_score,
-                label=label,
-            )
-
-        proba = model.predict_proba([normalized])[0]
-        classes = list(model.classes_)
-        unsafe_idx = classes.index(1) if 1 in classes else 0
-        injection_score = float(proba[unsafe_idx])
-        block_at, _ = _thresholds_for_backend("sklearn")
-        label = "injection" if injection_score >= block_at else "benign"
-        return MLPrediction(
-            enabled=True,
-            loaded=True,
-            backend="sklearn",
-            model_name=str(settings.ML_GUARD_SKLEARN_PATH.name),
-            injection_score=injection_score,
-            label=label,
-        )
+        return _run_cascade(normalized)
     except Exception as exc:
         logger.exception("ML prediction failed")
         return MLPrediction(
             enabled=True,
-            loaded=True,
-            backend=backend,
-            model_name=settings.ML_GUARD_MODEL,
+            loaded=False,
+            backend="error",
+            model_name="",
             injection_score=0.0,
             label="benign",
             error=str(exc),
@@ -242,22 +275,39 @@ def ml_decision(injection_score: float, backend: str = "hf") -> str | None:
 
 
 def classifier_status() -> dict:
-    backend, model = _ensure_loaded() if settings.ML_GUARD_ENABLED else ("off", None)
-    model_name = settings.ML_GUARD_MODEL
-    block_threshold = settings.ML_GUARD_BLOCK_THRESHOLD
-    warn_threshold = settings.ML_GUARD_WARN_THRESHOLD
+    sklearn_ready = ensure_sklearn_loaded()
+    hf_ready = _ensure_hf_loaded() is not None
+    grok_ready = is_grok_configured()
 
-    if backend == "grok":
-        model_name = settings.ML_GUARD_GROK_MODEL
+    if grok_ready:
+        primary_backend = "grok"
+        primary_model = settings.ML_GUARD_GROK_MODEL
         block_threshold = settings.ML_GUARD_GROK_BLOCK_THRESHOLD
         warn_threshold = settings.ML_GUARD_GROK_WARN_THRESHOLD
+    elif hf_ready:
+        primary_backend = "hf"
+        primary_model = settings.ML_GUARD_MODEL
+        block_threshold = settings.ML_GUARD_BLOCK_THRESHOLD
+        warn_threshold = settings.ML_GUARD_WARN_THRESHOLD
+    elif sklearn_ready:
+        primary_backend = "sklearn"
+        primary_model = str(settings.ML_GUARD_SKLEARN_PATH.name)
+        block_threshold = settings.ML_GUARD_SKLEARN_BLOCK_THRESHOLD
+        warn_threshold = settings.ML_GUARD_WARN_THRESHOLD
+    else:
+        primary_backend = "none"
+        primary_model = ""
+        block_threshold = settings.ML_GUARD_BLOCK_THRESHOLD
+        warn_threshold = settings.ML_GUARD_WARN_THRESHOLD
 
     return {
         "enabled": settings.ML_GUARD_ENABLED,
-        "loaded": model is not None,
-        "backend": backend if settings.ML_GUARD_ENABLED else "off",
-        "model": model_name,
-        "grok_configured": is_grok_configured(),
+        "loaded": grok_ready or sklearn_ready or hf_ready,
+        "backend": primary_backend if settings.ML_GUARD_ENABLED else "off",
+        "model": primary_model,
+        "grok_configured": grok_ready,
+        "sklearn_loaded": sklearn_ready,
+        "hf_loaded": hf_ready,
         "sklearn_path": str(settings.ML_GUARD_SKLEARN_PATH),
         "sklearn_exists": settings.ML_GUARD_SKLEARN_PATH.exists(),
         "block_threshold": block_threshold,
