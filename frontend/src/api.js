@@ -1,3 +1,5 @@
+const PRODUCTION_API_URL = "https://guardrail-gateway-api.onrender.com";
+
 function resolveApiBaseUrl() {
   const configured = import.meta.env.VITE_API_BASE_URL?.trim() || "";
   const isLocalhost =
@@ -7,7 +9,7 @@ function resolveApiBaseUrl() {
     if (configured && !isLocalhost) {
       return configured;
     }
-    return "";
+    return PRODUCTION_API_URL;
   }
 
   return configured || "http://localhost:8000";
@@ -18,13 +20,7 @@ const API_KEY = import.meta.env.VITE_GATEWAY_API_KEY?.trim() || "";
 const REQUEST_TIMEOUT_MS = 90_000;
 
 export function getApiBaseUrl() {
-  if (API_BASE_URL) {
-    return API_BASE_URL;
-  }
-  if (import.meta.env.PROD && typeof window !== "undefined") {
-    return window.location.origin;
-  }
-  return "http://localhost:8000";
+  return API_BASE_URL || PRODUCTION_API_URL;
 }
 
 function apiHeaders(extra = {}) {
@@ -42,7 +38,15 @@ async function fetchWithTimeout(url, options = {}) {
     return await fetch(url, { ...options, signal: controller.signal });
   } catch (err) {
     if (err.name === "AbortError") {
-      throw new Error("Request timed out. The gateway may be waking up - retry in a moment.");
+      throw new Error(
+        "Request timed out. The Render backend may be waking up - retry in a moment.",
+      );
+    }
+    if (err instanceof TypeError) {
+      throw new Error(
+        "Network error reaching the API. Check https://guardrail-gateway-api.onrender.com/health "
+        + "or restart the Render service.",
+      );
     }
     throw err;
   } finally {

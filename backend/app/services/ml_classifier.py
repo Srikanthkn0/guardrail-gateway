@@ -1,4 +1,4 @@
-"""Prompt-injection classifier — Grok LLM judge with sklearn/HF fallback cascade."""
+"""Prompt-injection classifier - Grok LLM judge with sklearn/HF fallback cascade."""
 
 from __future__ import annotations
 

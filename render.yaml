@@ -1,4 +1,4 @@
-# Render Blueprint — backend API
+# Render Blueprint - backend API
 # Set XAI_API_KEY or GROK_API_KEY for Grok chat + prompt scanning.
 # Set API_KEY and the same value as VITE_GATEWAY_API_KEY on Vercel for auth.
 

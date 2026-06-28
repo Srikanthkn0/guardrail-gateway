@@ -50,12 +50,12 @@ def _apply_ml_to_input(phase: ScanPhaseResult, text: str) -> ScanPhaseResult:
     hits = list(phase.hits)
 
     if ml.fallback_used:
-        reason = "ML primary backend unavailable — used sklearn/HF fallback"
+        reason = "ML primary backend unavailable - used sklearn/HF fallback"
         if reason not in reasons:
             reasons.append(reason)
 
     if not ml.loaded and ml.enabled and ml.error:
-        reason = f"ML classifier unavailable ({ml.error}) — rules-only scan"
+        reason = f"ML classifier unavailable ({ml.error}) - rules-only scan"
         if reason not in reasons:
             reasons.append(reason)
 

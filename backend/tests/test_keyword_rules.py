@@ -4,6 +4,7 @@ from app.services.rules_catalog import RULES
 from app.services.suspicious_keywords import (
     INPUT_BLOCK_PHRASES,
     INPUT_BLOCK_WORDS,
+    INPUT_WARN_PHRASES,
     OUTPUT_BLOCK_PHRASES,
     build_input_keyword_rules,
     build_output_keyword_rules,
@@ -11,8 +12,8 @@ from app.services.suspicious_keywords import (
 
 
 def test_keyword_rule_modules_are_wired():
-    assert len(build_input_keyword_rules()) >= 200
-    assert len(build_output_keyword_rules()) >= 350
+    assert len(build_input_keyword_rules()) >= 500
+    assert len(build_output_keyword_rules()) >= 700
     assert len(build_output_keyword_rules()) >= len(build_input_keyword_rules()) * 0.85
 
 
@@ -65,6 +66,7 @@ def test_mirrored_input_phrases_block_on_output():
 
 
 def test_keyword_registry_volume():
-    assert len(INPUT_BLOCK_PHRASES) >= 150
-    assert len(INPUT_BLOCK_WORDS) >= 30
-    assert len(OUTPUT_BLOCK_PHRASES) >= 100
+    assert len(INPUT_BLOCK_PHRASES) >= 400
+    assert len(INPUT_BLOCK_WORDS) >= 50
+    assert len(INPUT_WARN_PHRASES) >= 40
+    assert len(OUTPUT_BLOCK_PHRASES) >= 130

@@ -5,7 +5,7 @@ from app.models import RuleHit
 
 Decision = Literal["allow", "warn", "block"]
 
-# block > warn > allow — fixed priority for deterministic MVP decisions
+# block > warn > allow - fixed priority for deterministic MVP decisions
 _DECISION_RANK: dict[Decision, int] = {"allow": 0, "warn": 1, "block": 2}
 
 

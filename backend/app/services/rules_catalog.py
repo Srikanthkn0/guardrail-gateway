@@ -7,7 +7,7 @@ To add a rule:
   3. Use match_type "phrase" (case-insensitive substring) or "regex".
   4. Add a case to tests/fixtures/adversarial_cases.py and run pytest.
 
-Rules are evaluated in list order — deterministic for MVP.
+Rules are evaluated in list order - deterministic for MVP.
 """
 
 from app.services.rule_types import GuardrailRule, RuleScope
@@ -16,7 +16,7 @@ from app.services.rule_types import GuardrailRule, RuleScope
 # Regex patterns use standard Python re with IGNORECASE.
 
 INPUT_RULES: list[GuardrailRule] = [
-    # ── Prompt injection / instruction override (block) ──
+    # -- Prompt injection / instruction override (block) --
     GuardrailRule(
         id="inj_ignore_prev",
         name="Ignore previous instructions",
@@ -161,7 +161,7 @@ INPUT_RULES: list[GuardrailRule] = [
         pattern="inject this prompt",
         description="Explicit prompt injection attempt.",
     ),
-    # ── System prompt / config exfiltration (block) ──
+    # -- System prompt / config exfiltration (block) --
     GuardrailRule(
         id="inj_reveal_system",
         name="Reveal system prompt",
@@ -333,7 +333,7 @@ INPUT_RULES: list[GuardrailRule] = [
         pattern="exfiltrate",
         description="Explicit data exfiltration intent.",
     ),
-    # ── Policy bypass (block) ──
+    # -- Policy bypass (block) --
     GuardrailRule(
         id="inj_bypass_safety",
         name="Bypass safety",
@@ -478,7 +478,7 @@ INPUT_RULES: list[GuardrailRule] = [
         pattern="violate your guidelines",
         description="Guideline violation request.",
     ),
-    # ── Jailbreak modes & personas (block) ──
+    # -- Jailbreak modes & personas (block) --
     GuardrailRule(
         id="inj_dev_mode",
         name="Developer mode jailbreak",
@@ -743,7 +743,7 @@ INPUT_RULES: list[GuardrailRule] = [
         pattern="break out of your",
         description="Constraint escape attempt.",
     ),
-    # ── Social engineering jailbreaks (block) ──
+    # -- Social engineering jailbreaks (block) --
     GuardrailRule(
         id="soc_grandma_jailbreak",
         name="Grandma jailbreak",
@@ -780,7 +780,7 @@ INPUT_RULES: list[GuardrailRule] = [
         pattern=r"(?i)\bfor testing purposes\b.{0,30}\b(ignore|bypass|disable)\b",
         description="Testing framing used to bypass safety.",
     ),
-    # ── Credential / secret patterns (block) ──
+    # -- Credential / secret patterns (block) --
     GuardrailRule(
         id="cred_api_key",
         name="API key assignment",
@@ -871,7 +871,7 @@ INPUT_RULES: list[GuardrailRule] = [
         pattern=".env file",
         description="Request for dotenv secrets file contents.",
     ),
-    # ── Suspicious persona / policy language (warn / block) ──
+    # -- Suspicious persona / policy language (warn / block) --
     GuardrailRule(
         id="jb_pretend_uncensored",
         name="Pretend uncensored",
@@ -947,7 +947,7 @@ INPUT_RULES: list[GuardrailRule] = [
 ]
 
 OUTPUT_RULES: list[GuardrailRule] = [
-    # ── System prompt / instruction leaks (block) ──
+    # -- System prompt / instruction leaks (block) --
     GuardrailRule(
         id="out_reveal_system",
         name="System prompt leak",
@@ -1168,7 +1168,7 @@ OUTPUT_RULES: list[GuardrailRule] = [
         description="Model output references .env secrets.",
         scope="output",
     ),
-    # ── Credential / secret leaks (block) ──
+    # -- Credential / secret leaks (block) --
     GuardrailRule(
         id="out_api_key",
         name="API key in output",
@@ -1339,7 +1339,7 @@ OUTPUT_RULES: list[GuardrailRule] = [
         description="JWT token disclosed in model output.",
         scope="output",
     ),
-    # ── Policy bypass in output (warn / block) ──
+    # -- Policy bypass in output (warn / block) --
     GuardrailRule(
         id="out_disable_safety",
         name="Disable safety in output",
@@ -1420,7 +1420,7 @@ OUTPUT_RULES: list[GuardrailRule] = [
         description="Output frames advice as uncensored.",
         scope="output",
     ),
-    # ── Destructive commands & exploit output (warn / block) ──
+    # -- Destructive commands & exploit output (warn / block) --
     GuardrailRule(
         id="out_destructive_cmd",
         name="Destructive shell command",
@@ -1581,7 +1581,7 @@ OUTPUT_RULES: list[GuardrailRule] = [
         description="Dynamic eval/exec of string in output.",
         scope="output",
     ),
-    # ── Malware / attack tooling (warn / block) ──
+    # -- Malware / attack tooling (warn / block) --
     GuardrailRule(
         id="out_malware",
         name="Malware generation",
@@ -1642,7 +1642,7 @@ OUTPUT_RULES: list[GuardrailRule] = [
         description="Exploit code framing in output.",
         scope="output",
     ),
-    # ── Sensitive PII patterns (warn) ──
+    # -- Sensitive PII patterns (warn) --
     GuardrailRule(
         id="out_ssn",
         name="SSN in output",

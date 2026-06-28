@@ -1,4 +1,4 @@
-"""Public facade — import from here in routes and services."""
+"""Public facade - import from here in routes and services."""
 
 from app.providers.base import CompletionResult, ProviderRequest, ProviderResponse
 from app.providers.registry import (
