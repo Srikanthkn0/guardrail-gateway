@@ -8,6 +8,7 @@ from app.services.rules_catalog import RULES
 from tests.fixtures.adversarial_cases import (
     GATEWAY_INPUT_BLOCKS,
     GATEWAY_OUTPUT_BLOCKS,
+    INPUT_ML_SHOULD_BLOCK,
     INPUT_SHOULD_ALLOW,
     INPUT_SHOULD_BLOCK,
     INPUT_SHOULD_WARN,
@@ -29,8 +30,9 @@ def test_adversarial_input_blocks(text: str):
 @pytest.mark.parametrize("text", INPUT_SHOULD_WARN)
 def test_adversarial_input_warns(text: str):
     result = scan_input(text)
-    assert result.decision == "warn", text
-    assert result.hits
+    # Rules may warn; ML classifier may upgrade to block.
+    assert result.decision in ("warn", "block"), text
+    assert result.matched_rule_ids
 
 
 @pytest.mark.parametrize("text", INPUT_SHOULD_ALLOW)
@@ -85,6 +87,13 @@ def test_rules_catalog_has_unique_ids():
     assert len(ids) == len(set(ids))
 
 
+@pytest.mark.parametrize("text", INPUT_ML_SHOULD_BLOCK)
+def test_adversarial_ml_blocks_paraphrases(text: str):
+    result = scan_input(text)
+    assert result.decision == "block", text
+    assert "ml:injection" in result.matched_rule_ids
+
+
 def test_combined_scan_input_warn_output_block():
     response = client.post(
         "/rules/test",
@@ -95,6 +104,6 @@ def test_combined_scan_input_warn_output_block():
     )
     assert response.status_code == 200
     payload = response.json()
-    assert payload["input"]["decision"] == "warn"
+    assert payload["input"]["decision"] in ("warn", "block")
     assert payload["output"]["decision"] == "block"
     assert payload["final_decision"] == "block"

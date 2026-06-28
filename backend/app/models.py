@@ -53,8 +53,15 @@ class RuleHit(BaseModel):
 class ScanPhaseResult(BaseModel):
     phase: str
     decision: Decision
+    matched_rule_ids: list[str] = Field(default_factory=list)
     hits: list[RuleHit]
     reasons: list[str]
+    ml_enabled: bool = False
+    ml_loaded: bool = False
+    ml_backend: str | None = None
+    ml_score: float | None = None
+    ml_label: str | None = None
+    ml_model: str | None = None
 
 
 class RuleTestRequest(BaseModel):

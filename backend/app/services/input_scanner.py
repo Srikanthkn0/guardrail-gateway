@@ -1,11 +1,5 @@
-from app.services.rules_catalog import list_input_rules
-from app.services.text_matcher import scan_text
+from app.services.guardrail_engine import evaluate_input
 
 
 def scan_input(text: str):
-    return scan_text(
-        text,
-        list_input_rules(),
-        phase="input",
-        empty_reason="Empty input.",
-    )
+    return evaluate_input(text)

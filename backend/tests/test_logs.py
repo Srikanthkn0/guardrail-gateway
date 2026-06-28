@@ -41,11 +41,12 @@ def test_stats_aggregate_counts():
     stats = client.get("/stats").json()
     assert stats["total_requests"] == 3
     assert stats["allow_count"] == 1
-    assert stats["warn_count"] == 1
-    assert stats["block_count"] == 1
-    assert stats["forwarded_count"] == 2
-    assert stats["block_rate"] == round(1 / 3, 4)
-    assert stats["by_provider"][0]["provider"] == "mock"
+    assert stats["block_count"] == 2
+    assert stats["warn_count"] == 0
+    assert stats["forwarded_count"] == 1
+    assert stats["block_rate"] == round(2 / 3, 4)
+    providers = {row["provider"]: row["count"] for row in stats["by_provider"]}
+    assert providers.get("mock", 0) == 1
 
 
 def test_get_log_detail():

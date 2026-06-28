@@ -7,7 +7,7 @@ services:
     runtime: python
     plan: free
     rootDir: backend
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && python scripts/train_sklearn_classifier.py && python scripts/warm_ml_model.py
     startCommand: gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --workers 1 --timeout 120
     envVars:
       - key: APP_ENV
@@ -22,3 +22,9 @@ services:
         sync: false
       - key: GROQ_API_KEY
         sync: false
+      - key: ML_GUARD_ENABLED
+        value: "true"
+      - key: ML_GUARD_BACKEND
+        value: "auto"
+      - key: ML_GUARD_MODEL
+        value: "fmops/distilbert-prompt-injection"

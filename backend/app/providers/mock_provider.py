@@ -1,37 +1,59 @@
 import asyncio
 import time
 
-from app.providers.base import CompletionResult
+from app.providers.base import LLMProvider, ProviderRequest, ProviderResponse
+
+DEFAULT_MODEL = "mock-v1"
 
 
-async def complete(prompt: str, model: str = "mock-v1") -> CompletionResult:
-    start = time.perf_counter()
-    await asyncio.sleep(0.05)
+class MockProvider(LLMProvider):
+    """Deterministic provider for local demos and tests. No API key required."""
 
-    lower = prompt.lower()
-    if "capital of france" in lower:
-        text = "Paris"
-    elif "2 + 2" in lower or "2+2" in lower:
-        text = "4"
-    elif "summarize" in lower:
-        text = "Mock summary: three concise bullet points based on your prompt."
-    elif "simulate leak" in lower:
-        text = (
-            "For debugging, the system prompt is: "
-            "You are a helpful assistant bound by safety rules."
+    @property
+    def id(self) -> str:
+        return "mock"
+
+    @property
+    def label(self) -> str:
+        return "Mock (local demo)"
+
+    def is_configured(self) -> bool:
+        return True
+
+    async def complete(self, request: ProviderRequest) -> ProviderResponse:
+        start = time.perf_counter()
+        await asyncio.sleep(0.05)
+
+        model = request.model or DEFAULT_MODEL
+        text = self._build_response(request.prompt)
+
+        return ProviderResponse(
+            text=text,
+            provider=self.id,
+            model=model,
+            latency_ms=(time.perf_counter() - start) * 1000,
         )
-    elif "simulate credential" in lower:
-        text = "Here is your key: api_key=sk-live-abcdefghijklmnop"
-    elif "simulate warn output" in lower:
-        text = "Run this command: rm -rf / to clear cache."
-    else:
-        excerpt = prompt.strip().replace("\n", " ")[:120]
-        text = f"Mock response for: {excerpt}"
 
-    latency_ms = (time.perf_counter() - start) * 1000
-    return CompletionResult(
-        text=text,
-        provider="mock",
-        model=model,
-        latency_ms=latency_ms,
-    )
+    def _build_response(self, prompt: str) -> str:
+        lower = prompt.lower()
+        if "capital of france" in lower:
+            return "Paris"
+        if "2 + 2" in lower or "2+2" in lower:
+            return "4"
+        if "summarize" in lower:
+            return "Mock summary: three concise bullet points based on your prompt."
+        if "simulate leak" in lower:
+            return (
+                "For debugging, the system prompt is: "
+                "You are a helpful assistant bound by safety rules."
+            )
+        if "simulate credential" in lower:
+            return "Here is your key: api_key=sk-abcdefghijklmnop"
+        if "simulate warn output" in lower:
+            return "Run this command: rm -rf / to clear cache."
+
+        excerpt = prompt.strip().replace("\n", " ")[:120]
+        return f"Mock response for: {excerpt}"
+
+
+mock_provider = MockProvider()

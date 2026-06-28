@@ -28,6 +28,27 @@ class Settings:
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
     DEFAULT_PROVIDER: str = os.getenv("DEFAULT_PROVIDER", "mock")
     LLM_TIMEOUT_SEC: float = float(os.getenv("LLM_TIMEOUT_SEC", "60"))
+    ML_GUARD_ENABLED: bool = os.getenv("ML_GUARD_ENABLED", "true").lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+    ML_GUARD_BACKEND: str = os.getenv("ML_GUARD_BACKEND", "auto")
+    ML_GUARD_MODEL: str = os.getenv(
+        "ML_GUARD_MODEL", "fmops/distilbert-prompt-injection"
+    )
+    ML_GUARD_BLOCK_THRESHOLD: float = float(os.getenv("ML_GUARD_BLOCK_THRESHOLD", "0.85"))
+    ML_GUARD_WARN_THRESHOLD: float = float(os.getenv("ML_GUARD_WARN_THRESHOLD", "0.65"))
+    ML_GUARD_SKLEARN_BLOCK_THRESHOLD: float = float(
+        os.getenv("ML_GUARD_SKLEARN_BLOCK_THRESHOLD", "0.58")
+    )
+    ML_GUARD_MAX_LENGTH: int = int(os.getenv("ML_GUARD_MAX_LENGTH", "512"))
+    ML_GUARD_SKLEARN_PATH: Path = Path(
+        os.getenv(
+            "ML_GUARD_SKLEARN_PATH",
+            str(BASE_DIR / "data" / "models" / "injection_classifier.joblib"),
+        )
+    )
 
     @property
     def is_production(self) -> bool:

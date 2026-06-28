@@ -1,7 +1,6 @@
 import re
 
-from app.models import RuleHit, ScanPhaseResult
-from app.services.decision_engine import decide_from_hits
+from app.models import RuleHit
 from app.services.rules_catalog import GuardrailRule
 
 
@@ -41,32 +40,11 @@ def evaluate_rule(text: str, rule: GuardrailRule) -> RuleHit | None:
     )
 
 
-def scan_text(
-    text: str,
-    rules: list[GuardrailRule],
-    *,
-    phase: str,
-    empty_reason: str,
-) -> ScanPhaseResult:
-    normalized = text.strip()
-    if not normalized:
-        return ScanPhaseResult(
-            phase=phase,
-            decision="allow",
-            hits=[],
-            reasons=[empty_reason],
-        )
-
+def find_rule_hits(text: str, rules: list[GuardrailRule]) -> list[RuleHit]:
+    """Evaluate rules in catalog order. Deterministic: first-seen order preserved."""
     hits: list[RuleHit] = []
     for rule in rules:
-        hit = evaluate_rule(normalized, rule)
+        hit = evaluate_rule(text, rule)
         if hit:
             hits.append(hit)
-
-    decision, reasons = decide_from_hits(hits)
-    return ScanPhaseResult(
-        phase=phase,
-        decision=decision,
-        hits=hits,
-        reasons=reasons,
-    )
+    return hits

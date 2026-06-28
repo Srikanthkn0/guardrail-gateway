@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.config import settings
 from app.models import HealthResponse, ProviderStatus
 from app.providers.router import list_available_providers
+from app.services.ml_classifier import classifier_status
 
 router = APIRouter()
 
@@ -24,3 +25,8 @@ async def health_check():
         default_provider=settings.DEFAULT_PROVIDER,
         providers=providers,
     )
+
+
+@router.get("/health/ml")
+async def ml_health():
+    return classifier_status()

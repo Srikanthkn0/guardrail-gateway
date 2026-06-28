@@ -16,6 +16,7 @@ Update live URLs in this README if you choose different Vercel/Render service na
 ## Features
 
 - 22 guardrail rules (15 input, 7 output) with allow / warn / block decisions
+- **ML injection classifier** — [fmops/distilbert-prompt-injection](https://huggingface.co/fmops/distilbert-prompt-injection) (Hugging Face) with sklearn fallback for CI/edge
 - Provider routing: mock (default, no keys), OpenAI, Groq
 - Output redaction when output rules block a model reply
 - SQLite request logging with `/logs`, `/stats`, and dashboard filters
@@ -34,7 +35,7 @@ flowchart LR
 ```
 
 1. Client sends a prompt to `POST /gateway/chat`.
-2. Input scanner runs phrase/regex rules. Block stops the request.
+2. Input scanner runs phrase/regex rules **plus ML classifier** on input. Block stops the request.
 3. Allow/warn forwards to the configured provider (mock by default on Render).
 4. Output scanner checks the model reply. Block redacts `response_text`.
 5. Request metadata and rule hits are stored in SQLite.
@@ -104,6 +105,7 @@ Open http://localhost:5173.
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/health` | Gateway status and provider availability |
+| GET | `/health/ml` | ML classifier status (model, backend, thresholds) |
 | GET | `/rules` | List guardrail rules |
 | POST | `/rules/test` | Scan input (optional output text) |
 | POST | `/gateway/chat` | Full gateway flow |
@@ -153,6 +155,26 @@ cd backend
 ```
 
 Adversarial cases: `backend/tests/test_adversarial.py`, `backend/tests/fixtures/adversarial_cases.py`.
+
+### ML classifier
+
+Production uses **`fmops/distilbert-prompt-injection`** (ungated Hugging Face model, ~99% on paraphrased injections). CI and fallback use a committed sklearn pipeline.
+
+| Variable | Default | Notes |
+|----------|---------|-------|
+| `ML_GUARD_ENABLED` | `true` | Toggle hybrid ML + rules |
+| `ML_GUARD_BACKEND` | `auto` | `hf` → `sklearn` fallback |
+| `ML_GUARD_MODEL` | `fmops/distilbert-prompt-injection` | HF model id |
+| `ML_GUARD_BLOCK_THRESHOLD` | `0.85` | HF block threshold |
+| `ML_GUARD_SKLEARN_BLOCK_THRESHOLD` | `0.58` | Fallback threshold |
+
+Retrain sklearn fallback:
+
+```bash
+cd backend && python scripts/train_sklearn_classifier.py
+```
+
+Warm HF model at deploy (included in `render.yaml` build).
 
 ## Resume bullets
 

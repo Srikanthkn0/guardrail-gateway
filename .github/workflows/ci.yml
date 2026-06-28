@@ -27,8 +27,14 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements-dev.txt
 
+      - name: Train sklearn fallback model
+        run: python scripts/train_sklearn_classifier.py
+
       - name: Run tests
         run: pytest tests/ -v
+        env:
+          ML_GUARD_BACKEND: sklearn
+          ML_GUARD_ENABLED: "true"
 
   frontend:
     runs-on: ubuntu-latest

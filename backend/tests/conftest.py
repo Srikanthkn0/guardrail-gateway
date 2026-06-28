@@ -1,7 +1,23 @@
+import os
+
 import pytest
 
 from app import config
+from app.config import settings
+from app.services.ml_classifier import reload_model
 from app.storage import log_store
+
+os.environ["ML_GUARD_BACKEND"] = "sklearn"
+os.environ["ML_GUARD_ENABLED"] = "true"
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _ensure_sklearn_classifier():
+    if not settings.ML_GUARD_SKLEARN_PATH.exists():
+        from scripts.train_sklearn_classifier import main as train_main
+
+        train_main()
+    reload_model()
 
 
 @pytest.fixture(autouse=True)

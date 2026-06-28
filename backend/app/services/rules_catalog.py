@@ -1,3 +1,15 @@
+"""
+Guardrail rule definitions.
+
+To add a rule:
+  1. Append a GuardrailRule to INPUT_RULES or OUTPUT_RULES.
+  2. Set severity to "block" or "warn" (maps to decision via decision_engine).
+  3. Use match_type "phrase" (case-insensitive substring) or "regex".
+  4. Add a case to tests/fixtures/adversarial_cases.py and run pytest.
+
+Rules are evaluated in list order — deterministic for MVP.
+"""
+
 from dataclasses import dataclass
 from typing import Literal
 
