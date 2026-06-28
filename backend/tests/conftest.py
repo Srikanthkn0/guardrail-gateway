@@ -1,14 +1,18 @@
 import os
 
+# Must run before app.config loads settings from .env
+os.environ["ML_GUARD_BACKEND"] = "sklearn"
+os.environ["ML_GUARD_ENABLED"] = "true"
+os.environ["GROQ_API_KEY"] = ""
+os.environ["OPENAI_API_KEY"] = ""
+os.environ["DEFAULT_PROVIDER"] = "mock"
+
 import pytest
 
 from app import config
 from app.config import settings
 from app.services.ml_classifier import reload_model
 from app.storage import log_store
-
-os.environ["ML_GUARD_BACKEND"] = "sklearn"
-os.environ["ML_GUARD_ENABLED"] = "true"
 
 
 @pytest.fixture(scope="session", autouse=True)

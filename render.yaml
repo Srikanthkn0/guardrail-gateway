@@ -17,7 +17,7 @@ services:
       - key: DATA_DIR
         value: /tmp/guardrail-data
       - key: DEFAULT_PROVIDER
-        value: mock
+        value: auto
       - key: OPENAI_API_KEY
         sync: false
       - key: GROQ_API_KEY

@@ -101,9 +101,7 @@ def record_gateway_request(prompt: str, response: ChatResponse) -> None:
         else []
     )
     output_decision = response.output_scan.decision if response.output_scan else None
-    response_redacted = int(
-        response.forwarded and response.output_scan is not None and not response.response_text
-    )
+    response_redacted = int(response.response_redacted)
 
     with _connect() as conn:
         conn.execute(

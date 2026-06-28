@@ -23,6 +23,8 @@ async def handle_chat(
             output_scan=None,
             final_decision="block",
             forwarded=False,
+            llm_called=False,
+            response_redacted=False,
             reasons=input_scan.reasons,
         )
         record_gateway_request(prompt, response)
@@ -34,9 +36,8 @@ async def handle_chat(
     final_decision = combine_decisions(input_scan.decision, output_scan.decision)
     reasons = merge_reasons(input_scan.reasons, output_scan.reasons)
 
-    response_text = completion.text
-    if output_scan.decision == "block":
-        response_text = None
+    response_redacted = output_scan.decision == "block"
+    response_text = None if response_redacted else completion.text
 
     response = ChatResponse(
         request_id=request_id,
@@ -44,6 +45,8 @@ async def handle_chat(
         output_scan=output_scan,
         final_decision=final_decision,
         forwarded=True,
+        llm_called=True,
+        response_redacted=response_redacted,
         provider=completion.provider,
         model=completion.model,
         response_text=response_text,

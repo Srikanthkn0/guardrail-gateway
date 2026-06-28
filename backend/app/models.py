@@ -9,6 +9,8 @@ class ProviderStatus(BaseModel):
     id: str
     label: str
     available: bool
+    models: list[str] = Field(default_factory=list)
+    default_model: str | None = None
 
 
 class HealthResponse(BaseModel):
@@ -16,6 +18,7 @@ class HealthResponse(BaseModel):
     app_name: str
     environment: str
     default_provider: str
+    effective_default_provider: str
     providers: list[ProviderStatus]
 
 
@@ -87,6 +90,8 @@ class ChatResponse(BaseModel):
     output_scan: ScanPhaseResult | None = None
     final_decision: Decision
     forwarded: bool
+    llm_called: bool = False
+    response_redacted: bool = False
     provider: str | None = None
     model: str | None = None
     response_text: str | None = None

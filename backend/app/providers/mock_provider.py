@@ -15,7 +15,7 @@ class MockProvider(LLMProvider):
 
     @property
     def label(self) -> str:
-        return "Mock (local demo)"
+        return "Mock LLM (offline fallback)"
 
     def is_configured(self) -> bool:
         return True
@@ -52,8 +52,16 @@ class MockProvider(LLMProvider):
         if "simulate warn output" in lower:
             return "Run this command: rm -rf / to clear cache."
 
-        excerpt = prompt.strip().replace("\n", " ")[:120]
-        return f"Mock response for: {excerpt}"
+        excerpt = prompt.strip().replace("\n", " ")[:200]
+        if "?" in prompt:
+            return (
+                f"Based on your question about \"{excerpt}\", here is a concise answer. "
+                "Configure GROQ_API_KEY or OPENAI_API_KEY for live LLM responses."
+            )
+        return (
+            f"Here is a response to your request: {excerpt}. "
+            "Set GROQ_API_KEY on the backend for real model output."
+        )
 
 
 mock_provider = MockProvider()

@@ -66,10 +66,13 @@ export async function testRules(text, outputText = "") {
   return parseResponse(response);
 }
 
-export async function gatewayChat(prompt, provider) {
+export async function gatewayChat(prompt, provider, model) {
   const body = { prompt };
   if (provider) {
     body.provider = provider;
+  }
+  if (model) {
+    body.model = model;
   }
   const response = await fetch(apiUrl("/gateway/chat"), {
     method: "POST",

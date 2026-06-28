@@ -12,6 +12,12 @@ from app.providers.mock_provider import mock_provider
 from app.providers.openai_compatible import missing_key_message
 from app.providers.openai_provider import build_openai_provider
 
+PROVIDER_MODELS: dict[str, list[str]] = {
+    "mock": ["mock-v1"],
+    "openai": ["gpt-4o-mini", "gpt-4o", "gpt-4.1-mini"],
+    "groq": ["llama-3.1-8b-instant", "llama-3.3-70b-versatile", "mixtral-8x7b-32768"],
+}
+
 
 def get_registry() -> dict[str, LLMProvider]:
     """Build registry from current settings so tests can patch env vars."""
@@ -26,19 +32,37 @@ def get_provider(provider_id: str) -> LLMProvider | None:
     return get_registry().get(provider_id)
 
 
-def list_available_providers() -> list[dict[str, str | bool]]:
+def effective_default_provider() -> str:
+    """Pick the best configured provider: explicit env, then auto-detect keys."""
+    requested = settings.DEFAULT_PROVIDER.strip().lower()
+
+    if requested not in {"", "auto"}:
+        provider = get_provider(requested)
+        if provider and provider.is_configured():
+            return requested
+
+    if settings.GROQ_API_KEY.strip():
+        return "groq"
+    if settings.OPENAI_API_KEY.strip():
+        return "openai"
+    return "mock"
+
+
+def list_available_providers() -> list[dict[str, str | bool | list[str]]]:
     return [
         {
             "id": provider.id,
             "label": provider.label,
             "available": provider.is_configured(),
+            "models": PROVIDER_MODELS.get(provider.id, []),
+            "default_model": PROVIDER_MODELS.get(provider.id, [None])[0],
         }
         for provider in get_registry().values()
     ]
 
 
 def resolve_provider_name(requested: str | None) -> str:
-    provider_id = (requested or settings.DEFAULT_PROVIDER).strip().lower()
+    provider_id = (requested or effective_default_provider()).strip().lower()
     provider = get_provider(provider_id)
 
     if provider is None:
