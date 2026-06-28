@@ -60,6 +60,13 @@ export default function App() {
 
       <footer className="app-footer">
         <span>Guardrail Gateway</span>
+        <a
+          href="https://github.com/Srikanthkn0/guardrail-gateway"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Source on GitHub
+        </a>
       </footer>
     </div>
   );
