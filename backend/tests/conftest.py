@@ -4,6 +4,7 @@ import os
 os.environ["ML_GUARD_BACKEND"] = "sklearn"
 os.environ["ML_GUARD_ENABLED"] = "true"
 os.environ["OPENAI_API_KEY"] = ""
+os.environ["GEMINI_API_KEY"] = ""
 os.environ["XAI_API_KEY"] = ""
 os.environ["GROK_API_KEY"] = ""
 os.environ["DEFAULT_PROVIDER"] = "mock"

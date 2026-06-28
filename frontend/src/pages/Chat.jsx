@@ -168,8 +168,9 @@ export default function Chat({ onViewLog }) {
             </span>
           ) : (
             <span>
-              Offline mode: <strong>Mock LLM</strong> — add <code>XAI_API_KEY</code> or{" "}
-              <code>OPENAI_API_KEY</code> on the backend for real model calls. Effective default:{" "}
+              Offline mode: <strong>Mock LLM</strong> — add <code>GEMINI_API_KEY</code>,{" "}
+              <code>XAI_API_KEY</code>, or <code>OPENAI_API_KEY</code> on the backend. Effective
+              default:{" "}
               <code>{effectiveDefault}</code>.
             </span>
           )}

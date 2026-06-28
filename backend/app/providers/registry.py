@@ -7,6 +7,7 @@ from app.providers.base import (
     ProviderRequest,
     ProviderResponse,
 )
+from app.providers.gemini_provider import build_gemini_provider
 from app.providers.grok_provider import build_grok_provider
 from app.providers.mock_provider import mock_provider
 from app.providers.openai_compatible import missing_key_message
@@ -16,6 +17,7 @@ PROVIDER_MODELS: dict[str, list[str]] = {
     "mock": ["mock-v1"],
     "openai": ["gpt-4o-mini", "gpt-4o", "gpt-4.1-mini"],
     "grok": ["grok-3-mini", "grok-3", "grok-4.3"],
+    "gemini": ["gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-2.0-flash"],
 }
 
 
@@ -25,6 +27,7 @@ def get_registry() -> dict[str, LLMProvider]:
         mock_provider.id: mock_provider,
         "openai": build_openai_provider(),
         "grok": build_grok_provider(),
+        "gemini": build_gemini_provider(),
     }
 
 
@@ -43,6 +46,8 @@ def effective_default_provider() -> str:
 
     if settings.XAI_API_KEY.strip():
         return "grok"
+    if settings.GEMINI_API_KEY.strip():
+        return "gemini"
     if settings.OPENAI_API_KEY.strip():
         return "openai"
     return "mock"

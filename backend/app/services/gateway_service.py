@@ -4,23 +4,40 @@ from fastapi import HTTPException
 
 from app.config import settings
 from app.models import ChatResponse
+from app.providers.registry import get_provider
 from app.providers.router import complete, resolve_provider_name
 from app.services.decision_engine import combine_decisions, merge_reasons
 from app.services.input_scanner import scan_input
 from app.services.output_scanner import scan_output
 from app.storage.log_store import record_gateway_request
 
+FALLBACK_CHAIN: dict[str, list[str]] = {
+    "grok": ["gemini", "openai"],
+    "gemini": ["openai"],
+}
+
+
+def _fallback_providers(provider_name: str) -> list[str]:
+    candidates = FALLBACK_CHAIN.get(provider_name, [])
+    available = []
+    for provider_id in candidates:
+        provider = get_provider(provider_id)
+        if provider and provider.is_configured():
+            available.append(provider_id)
+    return available
+
 
 async def _call_provider(provider_name: str, prompt: str, model: str | None):
     try:
         return await complete(provider_name, prompt, model=model)
     except HTTPException as exc:
-        if (
-            provider_name == "grok"
-            and settings.OPENAI_API_KEY.strip()
-            and exc.status_code == 502
-        ):
-            return await complete("openai", prompt, model=None)
+        if exc.status_code != 502:
+            raise
+        for fallback_id in _fallback_providers(provider_name):
+            try:
+                return await complete(fallback_id, prompt, model=None)
+            except HTTPException:
+                continue
         raise
 
 

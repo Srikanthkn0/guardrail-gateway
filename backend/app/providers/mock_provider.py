@@ -56,11 +56,11 @@ class MockProvider(LLMProvider):
         if "?" in prompt:
             return (
                 f"Based on your question about \"{excerpt}\", here is a concise answer. "
-                "Configure XAI_API_KEY or OPENAI_API_KEY for live LLM responses."
+                "Configure GEMINI_API_KEY, XAI_API_KEY, or OPENAI_API_KEY for live LLM responses."
             )
         return (
             f"Here is a response to your request: {excerpt}. "
-            "Set XAI_API_KEY on the backend for real Grok model output."
+            "Set GEMINI_API_KEY or XAI_API_KEY on the backend for real model output."
         )
 
 
