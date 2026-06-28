@@ -200,18 +200,7 @@ export default function Logs({ focusRequestId, onFocusHandled }) {
           )}
 
           {!loading && logs.length === 0 && (
-            <div className="logs-empty">
-              <div className="logs-empty-icon" aria-hidden="true">
-                <svg viewBox="0 0 48 48" fill="none">
-                  <rect x="8" y="10" width="32" height="28" rx="3" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M14 18H34M14 24H28M14 30H22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-              </div>
-              <p className="logs-empty-title">No requests yet</p>
-              <p className="status-text">
-                Send a message from Chat to populate the audit trail.
-              </p>
-            </div>
+            <p className="status-text">No requests yet. Send a message from Chat.</p>
           )}
 
           {!loading && logs.length > 0 && (

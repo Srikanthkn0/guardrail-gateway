@@ -4,7 +4,7 @@ import DecisionBadge from "../components/DecisionBadge.jsx";
 import { fetchHealth, fetchLogs, fetchMlHealth, fetchStats, getApiBaseUrl } from "../api.js";
 import { formatTime } from "../utils/format.js";
 
-export default function Dashboard({ onOpenLogs, onOpenChat, ruleCount }) {
+export default function Dashboard({ onOpenLogs, ruleCount }) {
   const [health, setHealth] = useState(null);
   const [mlHealth, setMlHealth] = useState(null);
   const [stats, setStats] = useState(null);
@@ -60,37 +60,15 @@ export default function Dashboard({ onOpenLogs, onOpenChat, ruleCount }) {
     return "not loaded";
   }
 
-  const availableProviders = health?.providers?.filter((p) => p.available).length ?? 0;
-
   return (
     <div className="stack">
-      <div className="overview-strip">
-        <div className="overview-item">
-          <span className="overview-label">Rules</span>
-          <span className="overview-value">{ruleCount != null ? ruleCount.toLocaleString() : "n/a"}</span>
-        </div>
-        <div className="overview-item">
-          <span className="overview-label">Providers up</span>
-          <span className="overview-value">{availableProviders || "n/a"}</span>
-        </div>
-        <div className="overview-item">
-          <span className="overview-label">Requests</span>
-          <span className="overview-value">{stats?.total_requests ?? "n/a"}</span>
-        </div>
-        <div className="overview-item">
-          <span className="overview-label">ML scanner</span>
-          <span className="overview-value">
-            {mlHealth?.loaded ? "ready" : mlHealth?.enabled ? "idle" : "off"}
-          </span>
-        </div>
-        {onOpenChat && (
-          <div className="overview-actions">
-            <button type="button" className="btn btn-primary btn-sm-inline" onClick={onOpenChat}>
-              Open chat
-            </button>
-          </div>
-        )}
-      </div>
+      <header className="page-header">
+        <h2>Overview</h2>
+        <p>
+          Gateway health, scanner status, and recent requests.
+          {ruleCount != null ? ` ${ruleCount.toLocaleString()} rules loaded.` : ""}
+        </p>
+      </header>
 
       {stats && (
         <div className="stat-grid">

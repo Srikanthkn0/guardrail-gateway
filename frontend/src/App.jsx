@@ -1,119 +1,66 @@
-import { useEffect, useState } from "react";
-import Logo from "./components/Logo.jsx";
-import NavIcon from "./components/NavIcon.jsx";
+import { useState } from "react";
 import Chat from "./pages/Chat.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Logs from "./pages/Logs.jsx";
 import Rules from "./pages/Rules.jsx";
-import { fetchLiveness, fetchRules } from "./api.js";
 
-const NAV_ITEMS = [
-  { id: "dashboard", label: "Overview", icon: "dashboard" },
-  { id: "rules", label: "Rules", icon: "rules" },
-  { id: "chat", label: "Chat", icon: "chat" },
-  { id: "logs", label: "Logs", icon: "logs" },
+const TABS = [
+  { id: "dashboard", label: "Overview" },
+  { id: "rules", label: "Rules" },
+  { id: "chat", label: "Chat" },
+  { id: "logs", label: "Logs" },
 ];
-
-const GITHUB_URL = "https://github.com/Srikanthkn0/guardrail-gateway";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [logsFocusId, setLogsFocusId] = useState(null);
-  const [apiOnline, setApiOnline] = useState(null);
-  const [ruleCount, setRuleCount] = useState(null);
 
   function openLogs(requestId = null) {
     setLogsFocusId(requestId);
     setActiveTab("logs");
   }
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function check() {
-      try {
-        await fetchLiveness();
-        if (!cancelled) setApiOnline(true);
-      } catch {
-        if (!cancelled) setApiOnline(false);
-      }
-    }
-
-    check();
-    const interval = setInterval(check, 30_000);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, []);
-
-  useEffect(() => {
-    fetchRules()
-      .then((data) => setRuleCount(data.count))
-      .catch(() => setRuleCount(null));
-  }, []);
-
-  const activeItem = NAV_ITEMS.find((item) => item.id === activeTab) ?? NAV_ITEMS[0];
-  const isWidePage = activeTab === "chat" || activeTab === "logs";
-
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <div className="sidebar-brand">
-          <Logo size={32} showWordmark />
-        </div>
-
-        <nav className="sidebar-nav" aria-label="Main">
-          {NAV_ITEMS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`sidebar-link ${activeTab === item.id ? "sidebar-link-active" : ""}`}
-              onClick={() => setActiveTab(item.id)}
-            >
-              <NavIcon name={item.icon} />
-              <span className="sidebar-link-label">{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="sidebar-footer">
-          {ruleCount != null && (
-            <span className="sidebar-footnote">{ruleCount.toLocaleString()} rules loaded</span>
-          )}
-          <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="sidebar-github">
-            GitHub
-          </a>
-        </div>
-      </aside>
-
-      <div className="app-body">
-        <header className="topbar">
-          <div className="topbar-title">
-            <h1>{activeItem.label}</h1>
-            <span className="topbar-status">
-              <span className={`status-dot ${apiOnline === false ? "status-dot-offline" : ""}`} />
-              {apiOnline === null && "Checking API..."}
-              {apiOnline === true && "API online"}
-              {apiOnline === false && "API offline"}
-            </span>
+    <div className="app">
+      <header className="app-header">
+        <div className="header-inner">
+          <div className="brand">
+            <div className="brand-mark" aria-hidden="true" />
+            <div>
+              <h1>Guardrail Gateway</h1>
+              <p className="brand-sub">LLM request inspection and logging</p>
+            </div>
           </div>
-        </header>
+          <nav className="nav-tabs" aria-label="Main">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                className={`nav-tab ${activeTab === tab.id ? "nav-tab-active" : ""}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </header>
 
-        <main className={`main-content ${isWidePage ? "main-content-wide" : ""}`}>
-          {activeTab === "dashboard" && (
-            <Dashboard onOpenLogs={openLogs} onOpenChat={() => setActiveTab("chat")} ruleCount={ruleCount} />
-          )}
-          {activeTab === "rules" && <Rules ruleCount={ruleCount} />}
-          {activeTab === "chat" && <Chat onViewLog={openLogs} />}
-          {activeTab === "logs" && (
-            <Logs
-              focusRequestId={logsFocusId}
-              onFocusHandled={() => setLogsFocusId(null)}
-            />
-          )}
-        </main>
-      </div>
+      <main className="app-main">
+        {activeTab === "dashboard" && <Dashboard onOpenLogs={openLogs} />}
+        {activeTab === "rules" && <Rules />}
+        {activeTab === "chat" && <Chat onViewLog={openLogs} />}
+        {activeTab === "logs" && (
+          <Logs
+            focusRequestId={logsFocusId}
+            onFocusHandled={() => setLogsFocusId(null)}
+          />
+        )}
+      </main>
+
+      <footer className="app-footer">
+        <span>Guardrail Gateway</span>
+      </footer>
     </div>
   );
 }
