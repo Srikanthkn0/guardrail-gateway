@@ -4,7 +4,7 @@ import DecisionBadge from "../components/DecisionBadge.jsx";
 import { fetchHealth, fetchLogs, fetchMlHealth, fetchStats, getApiBaseUrl } from "../api.js";
 import { formatTime } from "../utils/format.js";
 
-export default function Dashboard({ onOpenLogs, ruleCount }) {
+export default function Dashboard({ onOpenLogs }) {
   const [health, setHealth] = useState(null);
   const [mlHealth, setMlHealth] = useState(null);
   const [stats, setStats] = useState(null);
@@ -64,143 +64,108 @@ export default function Dashboard({ onOpenLogs, ruleCount }) {
     <div className="stack">
       <header className="page-header">
         <h2>Overview</h2>
-        <p>
-          Gateway health, scanner status, and recent requests.
-          {ruleCount != null ? ` ${ruleCount.toLocaleString()} rules loaded.` : ""}
-        </p>
+        <p>Gateway health, decision breakdown, and recent traffic.</p>
       </header>
 
-      {stats && (
-        <div className="stat-grid">
-          <div className="stat-card">
-            <div className="stat-card-label">Total requests</div>
-            <div className="stat-card-value">{stats.total_requests}</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-card-label">Block rate</div>
-            <div className="stat-card-value fail">
-              {(stats.block_rate * 100).toFixed(1)}%
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-card-label">Warn rate</div>
-            <div className="stat-card-value warn">
-              {(stats.warn_rate * 100).toFixed(1)}%
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-card-label">Avg latency</div>
-            <div className="stat-card-value">
-              {stats.avg_latency_ms != null ? `${Math.round(stats.avg_latency_ms)}ms` : "n/a"}
-            </div>
+      <section className="card">
+        <h3>Backend</h3>
+
+        <div className="status-list">
+          <div className="status-list-item">
+            <span className="label">API URL</span>
+            <span className="value mono">{getApiBaseUrl()}</span>
           </div>
         </div>
-      )}
 
-      <div className="card-grid">
-        <section className="card">
-          <h3>Backend</h3>
+        {loading && <p className="status-text">Checking backend...</p>}
 
+        {error && (
+          <div className="alert alert-error">
+            <strong>Backend unreachable.</strong> {error}
+            <p className="hint">
+              Local: <code>cd backend && PORT=8010 ./run.sh</code>. Production:
+              {" "}
+              <a href="https://guardrail-gateway-api.onrender.com/health" target="_blank" rel="noreferrer">
+                guardrail-gateway-api.onrender.com
+              </a>
+            </p>
+          </div>
+        )}
+
+        {health && (
           <div className="status-list">
             <div className="status-list-item">
-              <span className="label">API URL</span>
-              <span className="value mono">{getApiBaseUrl()}</span>
+              <span className="label">Status</span>
+              <span className="value">{health.status}</span>
+            </div>
+            <div className="status-list-item">
+              <span className="label">Environment</span>
+              <span className="value">{health.environment}</span>
+            </div>
+            <div className="status-list-item">
+              <span className="label">Default provider</span>
+              <span className="value">{health.default_provider}</span>
             </div>
           </div>
+        )}
 
-          {loading && <p className="status-text">Checking backend...</p>}
-
-          {error && (
-            <div className="alert alert-error">
-              <strong>Backend unreachable.</strong> {error}
-              <p className="hint">
-                Local: start the API on port 8000 or 8010. Production uses the Vercel proxy.
-              </p>
-            </div>
-          )}
-
-          {health && (
-            <>
-              <div className="status-list">
-                <div className="status-list-item">
-                  <span className="label">Status</span>
-                  <span className="value">{health.status}</span>
-                </div>
-                <div className="status-list-item">
-                  <span className="label">Environment</span>
-                  <span className="value">{health.environment}</span>
-                </div>
-                <div className="status-list-item">
-                  <span className="label">Default provider</span>
-                  <span className="value">{health.default_provider}</span>
-                </div>
-              </div>
-
-              {health.providers?.length > 0 && (
-                <div className="table-wrap">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Provider</th>
-                        <th>Available</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {health.providers.map((item) => (
-                        <tr key={item.id}>
-                          <td>{item.label}</td>
-                          <td>
-                            <span className={`provider-dot ${item.available ? "provider-dot-on" : ""}`}>
-                              {item.available ? "online" : "offline"}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </>
-          )}
-        </section>
-
-        <section className="ml-card">
-          <div className="ml-card-header">
-            <span className="ml-card-title">Prompt scanner</span>
-            {mlHealth && <span className={`ml-badge ${mlBadgeClass()}`}>{mlBadgeLabel()}</span>}
+        {health?.providers?.length > 0 && (
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Provider</th>
+                  <th>Available</th>
+                </tr>
+              </thead>
+              <tbody>
+                {health.providers.map((item) => (
+                  <tr key={item.id}>
+                    <td>{item.label}</td>
+                    <td>{item.available ? "yes" : "no"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+        )}
+      </section>
 
-          {!mlHealth && <p className="status-text">Loading ML status...</p>}
-
-          {mlHealth && (
-            <div className="ml-details">
-              <div className="ml-detail">
-                <div className="ml-detail-label">Backend</div>
-                <div className="ml-detail-value">{mlHealth.backend}</div>
-              </div>
-              <div className="ml-detail">
-                <div className="ml-detail-label">Block threshold</div>
-                <div className="ml-detail-value">{mlHealth.block_threshold}</div>
-              </div>
-              <div className="ml-detail">
-                <div className="ml-detail-label">Model</div>
-                <div className="ml-detail-value mono">{mlHealth.model}</div>
-              </div>
-              <div className="ml-detail">
-                <div className="ml-detail-label">Warn threshold</div>
-                <div className="ml-detail-value">{mlHealth.warn_threshold}</div>
-              </div>
-            </div>
-          )}
-        </section>
-      </div>
-
-      {stats && (
+      {mlHealth && (
         <section className="card">
-          <h3>Decision breakdown</h3>
-          <StatsSummary stats={stats} compact showProviders />
+          <div className="toolbar">
+            <h3>Prompt scanner</h3>
+            <span className={`ml-badge ${mlBadgeClass()}`}>{mlBadgeLabel()}</span>
+          </div>
+          <div className="status-list">
+            <div className="status-list-item">
+              <span className="label">Backend</span>
+              <span className="value">{mlHealth.backend}</span>
+            </div>
+            <div className="status-list-item">
+              <span className="label">Model</span>
+              <span className="value mono">{mlHealth.model || "n/a"}</span>
+            </div>
+            <div className="status-list-item">
+              <span className="label">Block threshold</span>
+              <span className="value">{mlHealth.block_threshold}</span>
+            </div>
+            <div className="status-list-item">
+              <span className="label">Warn threshold</span>
+              <span className="value">{mlHealth.warn_threshold}</span>
+            </div>
+          </div>
         </section>
       )}
+
+      <section className="card">
+        <h3>Gateway stats</h3>
+        {stats ? (
+          <StatsSummary stats={stats} />
+        ) : (
+          <p className="status-text">No stats yet. Stats appear after the API is online and requests are logged.</p>
+        )}
+      </section>
 
       <section className="card">
         <div className="toolbar">
@@ -211,13 +176,13 @@ export default function Dashboard({ onOpenLogs, ruleCount }) {
               className="btn btn-secondary btn-sm-inline"
               onClick={() => onOpenLogs()}
             >
-              View all logs
+              Open logs
             </button>
           )}
         </div>
 
         {recentLogs.length === 0 && (
-          <p className="status-text">No requests yet. Send a prompt from Chat.</p>
+          <p className="status-text">No requests yet. Send a prompt from the Chat tab.</p>
         )}
 
         {recentLogs.length > 0 && (
