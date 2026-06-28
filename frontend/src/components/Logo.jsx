@@ -16,13 +16,13 @@ export default function Logo({ size = 36, showWordmark = false, className = "" }
       >
         <defs>
           <linearGradient id={`${id}-ring`} x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#6ee7b7" />
-            <stop offset="0.5" stopColor="#34d399" />
-            <stop offset="1" stopColor="#0ea5e9" />
+            <stop stopColor="#34d399" />
+            <stop offset="0.5" stopColor="#10b981" />
+            <stop offset="1" stopColor="#0d9488" />
           </linearGradient>
           <linearGradient id={`${id}-shield`} x1="14" y1="10" x2="34" y2="38" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#111820" />
-            <stop offset="1" stopColor="#0a0e12" />
+            <stop stopColor="#070a0e" />
+            <stop offset="1" stopColor="#020304" />
           </linearGradient>
           <linearGradient id={`${id}-shine`} x1="12" y1="8" x2="36" y2="32" gradientUnits="userSpaceOnUse">
             <stop stopColor="#ffffff" stopOpacity="0.22" />
@@ -54,19 +54,19 @@ export default function Logo({ size = 36, showWordmark = false, className = "" }
 
         <path
           d="M18 23.5H21.5V27H26.5V23.5H30"
-          stroke="#6ee7b7"
+          stroke="#34d399"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
         <path
           d="M18 23.5V20.5C18 18.8 19.4 17.5 21 17.5H27C28.6 17.5 30 18.8 30 20.5V23.5"
-          stroke="#34d399"
+          stroke="#10b981"
           strokeWidth="1.75"
           strokeLinecap="round"
         />
 
-        <circle cx="24" cy="16" r="1.5" fill="#38bdf8" opacity="0.9" />
+        <circle cx="24" cy="16" r="1.5" fill="#10b981" opacity="0.9" />
       </svg>
 
       {showWordmark && (
