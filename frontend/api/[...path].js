@@ -1,20 +1,36 @@
 const API_ORIGIN =
   process.env.GUARDRAIL_API_ORIGIN || "https://guardrail-gateway-api.onrender.com";
 
-export default async function handler(req, res) {
+function resolveTargetPath(req) {
   const rawPath = req.query.path;
-  const segments = Array.isArray(rawPath) ? rawPath : rawPath ? [rawPath] : [];
-  const targetPath = segments.map((part) => String(part)).join("/");
-  const targetUrl = new URL(`${API_ORIGIN}/${targetPath}`);
-
-  for (const [key, value] of Object.entries(req.query)) {
-    if (key === "path") continue;
-    if (Array.isArray(value)) {
-      value.forEach((entry) => targetUrl.searchParams.append(key, String(entry)));
-    } else if (value != null) {
-      targetUrl.searchParams.set(key, String(value));
-    }
+  if (rawPath) {
+    const segments = Array.isArray(rawPath) ? rawPath : [rawPath];
+    const joined = segments.map((part) => String(part)).join("/");
+    if (joined) return joined;
   }
+
+  const host = req.headers.host || "localhost";
+  const url = new URL(req.url || "/", `https://${host}`);
+  const prefix = "/api/";
+  if (url.pathname.startsWith(prefix)) {
+    return url.pathname.slice(prefix.length);
+  }
+  return "";
+}
+
+export default async function handler(req, res) {
+  const targetPath = resolveTargetPath(req);
+  const targetUrl = new URL(
+    targetPath ? `${API_ORIGIN}/${targetPath}` : `${API_ORIGIN}/`,
+  );
+
+  const host = req.headers.host || "localhost";
+  const requestUrl = new URL(req.url || "/", `https://${host}`);
+  requestUrl.searchParams.forEach((value, key) => {
+    if (key !== "path") {
+      targetUrl.searchParams.append(key, value);
+    }
+  });
 
   const headers = {
     Accept: "application/json",
