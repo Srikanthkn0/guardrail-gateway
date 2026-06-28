@@ -97,7 +97,6 @@ class OpenAICompatibleProvider(LLMProvider):
 def missing_key_message(provider_id: str) -> str:
     env_name = {
         "openai": "OPENAI_API_KEY",
-        "groq": "GROQ_API_KEY",
         "grok": "XAI_API_KEY or GROK_API_KEY",
     }.get(provider_id, "API key")
     return f"{provider_id.title()} provider selected but {env_name} is not configured."

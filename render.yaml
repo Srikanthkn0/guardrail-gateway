@@ -20,8 +20,6 @@ services:
         value: auto
       - key: OPENAI_API_KEY
         sync: false
-      - key: GROQ_API_KEY
-        sync: false
       - key: XAI_API_KEY
         sync: false
       - key: GROK_API_KEY

@@ -3,7 +3,6 @@ import os
 # Must run before app.config loads settings from .env
 os.environ["ML_GUARD_BACKEND"] = "sklearn"
 os.environ["ML_GUARD_ENABLED"] = "true"
-os.environ["GROQ_API_KEY"] = ""
 os.environ["OPENAI_API_KEY"] = ""
 os.environ["XAI_API_KEY"] = ""
 os.environ["GROK_API_KEY"] = ""

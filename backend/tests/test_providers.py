@@ -39,7 +39,7 @@ def test_list_available_providers_without_keys():
     providers = {item["id"]: item for item in list_available_providers()}
     assert providers["mock"]["available"] is True
     assert providers["openai"]["available"] is bool(settings.OPENAI_API_KEY)
-    assert providers["groq"]["available"] is bool(settings.GROQ_API_KEY)
+    assert providers["grok"]["available"] is bool(settings.XAI_API_KEY)
 
 
 def test_resolve_unknown_provider_raises_400():

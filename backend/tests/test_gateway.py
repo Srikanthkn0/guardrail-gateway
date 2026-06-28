@@ -74,9 +74,9 @@ def test_health_lists_providers():
     providers = {item["id"]: item for item in payload["providers"]}
     assert providers["mock"]["available"] is True
     assert "openai" in providers
-    assert "groq" in providers
+    assert "grok" in providers
     assert "effective_default_provider" in payload
-    assert payload["effective_default_provider"] in {"mock", "openai", "groq"}
+    assert payload["effective_default_provider"] in {"mock", "openai", "grok"}
 
 
 def test_gateway_chat_sets_llm_called_flags():

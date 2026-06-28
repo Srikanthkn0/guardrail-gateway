@@ -8,7 +8,6 @@ from app.providers.base import (
     ProviderResponse,
 )
 from app.providers.grok_provider import build_grok_provider
-from app.providers.groq_provider import build_groq_provider
 from app.providers.mock_provider import mock_provider
 from app.providers.openai_compatible import missing_key_message
 from app.providers.openai_provider import build_openai_provider
@@ -16,7 +15,6 @@ from app.providers.openai_provider import build_openai_provider
 PROVIDER_MODELS: dict[str, list[str]] = {
     "mock": ["mock-v1"],
     "openai": ["gpt-4o-mini", "gpt-4o", "gpt-4.1-mini"],
-    "groq": ["llama-3.1-8b-instant", "llama-3.3-70b-versatile", "mixtral-8x7b-32768"],
     "grok": ["grok-3-mini", "grok-3", "grok-4.3"],
 }
 
@@ -26,7 +24,6 @@ def get_registry() -> dict[str, LLMProvider]:
     return {
         mock_provider.id: mock_provider,
         "openai": build_openai_provider(),
-        "groq": build_groq_provider(),
         "grok": build_grok_provider(),
     }
 
@@ -44,8 +41,6 @@ def effective_default_provider() -> str:
         if provider and provider.is_configured():
             return requested
 
-    if settings.GROQ_API_KEY.strip():
-        return "groq"
     if settings.XAI_API_KEY.strip():
         return "grok"
     if settings.OPENAI_API_KEY.strip():

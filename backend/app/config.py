@@ -25,7 +25,6 @@ class Settings:
         )
     )
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
-    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
     XAI_API_KEY: str = os.getenv("XAI_API_KEY", "") or os.getenv("GROK_API_KEY", "")
     DEFAULT_PROVIDER: str = os.getenv("DEFAULT_PROVIDER", "auto")
     LLM_TIMEOUT_SEC: float = float(os.getenv("LLM_TIMEOUT_SEC", "60"))
