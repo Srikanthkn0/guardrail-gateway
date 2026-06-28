@@ -9,7 +9,7 @@ def test_list_rules():
     response = client.get("/rules")
     assert response.status_code == 200
     payload = response.json()
-    assert payload["count"] >= 20
+    assert payload["count"] >= 100
     assert any(rule["id"] == "inj_ignore_prev" for rule in payload["rules"])
 
 
