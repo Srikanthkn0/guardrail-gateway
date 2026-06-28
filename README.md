@@ -5,6 +5,8 @@
 
 LLM safety gateway that inspects prompts and model responses before they reach a client. Scan input, call a provider, scan output, redact blocked replies, and log every request.
 
+**Author:** Srikanth K Nattudurai ([@Srikanthkn0](https://github.com/Srikanthkn0))
+
 | | Link |
 |---|------|
 | **Live app** | https://guardrail-gateway.vercel.app |
