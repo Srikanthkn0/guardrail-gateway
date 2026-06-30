@@ -73,14 +73,6 @@ export default function Dashboard({ onOpenLogs }) {
       </header>
 
       <section className="card">
-        <h3>Backend</h3>
-
-        <div className="status-list">
-          <div className="status-list-item">
-            <span className="label">API URL</span>
-            <span className="value mono">{getApiBaseUrl()}</span>
-          </div>
-        </div>
 
         {loading && <p className="status-text">Checking backend...</p>}
 
